@@ -25,12 +25,16 @@ export function useExchangeRate(): UseExchangeRateResult {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/exchange-rate");
+      const res = await fetch("https://open.er-api.com/v6/latest/GBP");
       if (!res.ok) throw new Error("API yanıt vermedi");
-      const data: ExchangeRateData = await res.json();
-      setRate(data.rate);
-      setSource(data.source);
-      setFetchedAt(data.fetchedAt);
+      const data = await res.json();
+      const tryRate: number = data?.rates?.TRY;
+      if (!tryRate || typeof tryRate !== "number") {
+        throw new Error("Kur verisi bulunamadı");
+      }
+      setRate(tryRate);
+      setSource("live");
+      setFetchedAt(new Date().toISOString());
     } catch (err) {
       setError("Kur verisi alınamadı, yedek kur kullanılıyor.");
       setRate(FALLBACK_RATE);
