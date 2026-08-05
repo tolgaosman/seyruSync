@@ -109,6 +109,7 @@ export function useFuelPrice(): UseFuelPriceResult {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchLiveFuelPrice();
     const interval = setInterval(fetchLiveFuelPrice, 24 * 60 * 60 * 1000);
     return () => clearInterval(interval);

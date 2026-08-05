@@ -11,7 +11,7 @@ import {
 } from "@/utils/taxCalculator";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Scale, ShieldCheck, TrendingUp, X, PoundSterling } from "lucide-react";
+import { Scale, ShieldCheck, X, PoundSterling } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TaxDisplayProps {

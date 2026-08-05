@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Car } from "@/types";
 import { CarSelector } from "@/components/CarSelector";
 import { TaxDisplay } from "@/components/TaxDisplay";
@@ -11,7 +11,6 @@ import { FuelPricesTable } from "@/components/FuelPricesTable";
 import { ExchangeRatesTable } from "@/components/ExchangeRatesTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   DEFAULT_FUEL_PRICE_TL,
   DEFAULT_ANNUAL_KM,
@@ -20,16 +19,13 @@ import { useExchangeRate } from "@/hooks/useExchangeRate";
 import { useFuelPrice } from "@/hooks/useFuelPrice";
 import {
   Car as CarIcon,
-  Fuel,
   Route,
   BarChart3,
   TableIcon,
   ShieldCheck,
   PoundSterling,
   TrendingUp,
-  RefreshCw,
   AlertTriangle,
-  Wifi,
 } from "lucide-react";
 
 const MAX_CARS = 3;
@@ -46,29 +42,11 @@ export default function Home() {
   const {
     rate: gbpRate,
     source: rateSource,
-    fetchedAt,
     isLoading: rateLoading,
-    error: rateError,
-    refresh: refreshRate,
   } = useExchangeRate();
 
-  // Canlı & Günlük Otomatik KKTC Benzin TL/L Fiyatı
-  const {
-    prices,
-    lastUpdated: fuelLastUpdated,
-    refresh: refreshFuelPrice,
-  } = useFuelPrice();
-
+  const { prices } = useFuelPrice();
   const liveFuelPriceTL = prices?.oktan95 || DEFAULT_FUEL_PRICE_TL;
-
-  const [fuelPriceTL, setFuelPriceTL] = useState<number>(DEFAULT_FUEL_PRICE_TL);
-
-  // Canlı benzin fiyatı geldiğinde state'i güncelle
-  useEffect(() => {
-    if (liveFuelPriceTL && liveFuelPriceTL > 0) {
-      setFuelPriceTL(liveFuelPriceTL);
-    }
-  }, [liveFuelPriceTL]);
 
   // Seçilen tüm araçlar
   const allCars: Car[] = selectedCars.filter((c): c is Car => c !== null).slice(0, MAX_CARS);
@@ -89,13 +67,6 @@ export default function Home() {
   const rateDisplay = rateLoading
     ? "Kur yükleniyor…"
     : `1 £ = ${gbpRate.toFixed(2)} ₺`;
-
-  const fetchedDate = fetchedAt
-    ? new Date(fetchedAt).toLocaleTimeString("tr-TR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-    : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
@@ -278,7 +249,7 @@ export default function Home() {
                 <ComparisonTable
                   cars={allCars}
                   gbpRate={gbpRate}
-                  fuelPriceTL={fuelPriceTL}
+                  fuelPriceTL={liveFuelPriceTL}
                 />
               </div>
             )}
@@ -289,14 +260,14 @@ export default function Home() {
                 <SectionHeader
                   icon={<BarChart3 className="h-5 w-5" />}
                   title="5 Yıllık Toplam Sahip Olma Maliyeti (TCO)"
-                  subtitle={`${annualKm.toLocaleString("tr-TR")} km/yıl · ${fuelPriceTL} TL/litre · 5 yıl · Araç fiyatı 1 £ = ${gbpRate.toFixed(2)} TL üzerinden TL'ye çevrildi`}
+                  subtitle={`${annualKm.toLocaleString("tr-TR")} km/yıl · ${liveFuelPriceTL} TL/litre · 5 yıl · Araç fiyatı 1 £ = ${gbpRate.toFixed(2)} TL&apos;ye çevrildi`}
                 />
                 <Card>
                   <CardContent className="pt-5">
                     <TCOChart
                       cars={allCars}
                       gbpRate={gbpRate}
-                      fuelPriceTL={fuelPriceTL}
+                      fuelPriceTL={liveFuelPriceTL}
                       annualKm={annualKm}
                     />
                   </CardContent>
@@ -346,7 +317,7 @@ export default function Home() {
           <span className="text-blue-500 font-medium">
             KKTC Maliye Bakanlığı
           </span>
-          'na başvurunuz.
+          &apos;na başvurunuz.
         </p>
         <p className="mt-1 text-slate-300">
           Araç fiyatları KKTC piyasa değerlerini yansıtır ve piyasa koşullarına

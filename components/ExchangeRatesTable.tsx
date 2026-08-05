@@ -84,7 +84,7 @@ export function ExchangeRatesTable() {
               className="h-8 text-sm flex-1"
               placeholder="Miktar"
             />
-            <Select value={baseCurrency} onValueChange={(val: any) => setBaseCurrency(val)}>
+            <Select value={baseCurrency} onValueChange={(val: "GBP" | "USD" | "EUR" | "TRY") => setBaseCurrency(val)}>
               <SelectTrigger className="w-24 h-8 text-xs font-semibold">
                 <SelectValue />
               </SelectTrigger>

@@ -95,6 +95,7 @@ export function useExchangeRate(): UseExchangeRateResult {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRate();
     const interval = setInterval(fetchRate, 15 * 60 * 1000); // 15 dk bir canlı yenile
     return () => clearInterval(interval);
