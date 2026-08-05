@@ -56,12 +56,8 @@ export default function Home() {
     refresh: refreshRate,
   } = useExchangeRate();
 
-  // Canlı KKTC Benzin TL/L Fiyatı
-  const {
-    fuelPriceTL: liveFuelPriceTL,
-    source: fuelSource,
-    refresh: refreshFuel,
-  } = useFuelPrice();
+  // Resmi KKTC Benzin TL/L Fiyatı (61.12 TL/L)
+  const { fuelPriceTL: liveFuelPriceTL } = useFuelPrice();
 
   const [fuelPriceTL, setFuelPriceTL] = useState<number>(DEFAULT_FUEL_PRICE_TL);
 
@@ -174,19 +170,11 @@ export default function Home() {
 
           {/* TCO Parametreleri (masaüstü) */}
           <div className="hidden lg:flex items-center gap-4 text-sm text-slate-500">
-            <div className="flex items-center gap-1.5">
-              <Fuel className="h-4 w-4 text-slate-400" />
-              <span className="text-xs">Yakıt:</span>
-              <div className="flex items-center border border-slate-300 rounded-lg overflow-hidden">
-                <Input
-                  type="number"
-                  className="border-0 h-7 w-16 text-sm shadow-none focus-visible:ring-0 text-slate-700 font-medium"
-                  value={fuelPriceTL}
-                  onChange={(e) => setFuelPriceTL(Number(e.target.value))}
-                  min={1}
-                />
-                <span className="text-xs text-slate-400 pr-2">TL/L</span>
-              </div>
+            <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1 text-xs">
+              <Fuel className="h-4 w-4 text-emerald-600" />
+              <span className="text-xs font-semibold text-slate-700">KKTC Benzin:</span>
+              <span className="font-bold text-slate-800">{fuelPriceTL.toFixed(2)} TL/L</span>
+              <span className="text-[10px] text-slate-400 font-medium">(Resmi Sabit)</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Route className="h-4 w-4 text-slate-400" />
@@ -321,14 +309,15 @@ export default function Home() {
                   )}
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-500 font-medium">
-                    Yakıt Fiyatı (TL/litre)
+                  <label className="text-xs text-slate-500 font-medium flex items-center justify-between">
+                    <span>KKTC Benzin Fiyatı (TL/litre)</span>
+                    <span className="text-[10px] text-emerald-600 font-semibold">(Resmi Sabit)</span>
                   </label>
                   <Input
                     type="number"
                     value={fuelPriceTL}
-                    onChange={(e) => setFuelPriceTL(Number(e.target.value))}
-                    min={1}
+                    disabled
+                    className="bg-slate-100 font-bold text-slate-700 cursor-not-allowed"
                   />
                 </div>
                 <div className="space-y-1">

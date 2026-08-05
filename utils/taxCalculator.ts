@@ -43,8 +43,8 @@ export const BAREMS = [
 /** Sabit çevre katkı payı – KKTC yeşil vergi komponenti */
 export const BASE_EMISSION_FEE = 500; // TL
 
-/** KKTC benzin fiyatı (TL/litre) */
-export const DEFAULT_FUEL_PRICE_TL = 55;
+/** KKTC resmi 95 oktan benzin fiyatı (TL/litre) */
+export const DEFAULT_FUEL_PRICE_TL = 61.12;
 
 /** KKTC'de ortalama yıllık araç kullanımı (km) */
 export const DEFAULT_ANNUAL_KM = 15_000;

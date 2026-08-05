@@ -1,60 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+/**
+ * KKTC Resmi Akaryakıt Fiyatları
+ * Kaynak: https://www.triprentacar.com.tr/kibris-ta-petrol-fiyatlari.html
+ * 
+ * - Kurşunsuz 95 Oktan Benzin: 61.12 TL/L
+ * - Kurşunsuz 98 Oktan Benzin: 62.12 TL/L
+ * - Euro Diesel: 60.00 TL/L
+ */
 
-const DEFAULT_KKTC_FUEL_PRICE_TL = 39.5; // KKTC 95 Oktan güncel ortalama benzin fiyatı (TL/L)
+export const KKTC_FUEL_PRICES = {
+  gasoline95: 61.12, // TL/Litre
+  gasoline98: 62.12, // TL/Litre
+  diesel: 60.00,     // TL/Litre
+};
 
-export interface UseFuelPriceResult {
-  fuelPriceTL: number;
-  source: "live" | "fallback" | "loading";
-  isLoading: boolean;
-  error: string | null;
-  refresh: () => void;
-}
-
-export function useFuelPrice(): UseFuelPriceResult {
-  const [fuelPriceTL, setFuelPriceTL] = useState<number>(DEFAULT_KKTC_FUEL_PRICE_TL);
-  const [source, setSource] = useState<"live" | "fallback" | "loading">("loading");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchFuelPrice = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // 1. Serbest benzin fiyatı / ham petrol & döviz endeksli canlı KKTC benzin fiyatı tahmini
-      const res = await fetch("https://open.er-api.com/v6/latest/USD");
-      if (res.ok) {
-        const data = await res.json();
-        const usdTry = data?.rates?.TRY;
-        if (usdTry && typeof usdTry === "number") {
-          // KKTC Benzin fiyatı (1 L 95 Oktan ≈ $1.05 - $1.15 USD karşılığı TL)
-          const estimatedKktcFuelTL = Number((usdTry * 1.10).toFixed(2));
-          setFuelPriceTL(estimatedKktcFuelTL);
-          setSource("live");
-          setIsLoading(false);
-          return;
-        }
-      }
-      throw new Error("Canlı akaryakıt verisi alınamadı");
-    } catch (err) {
-      setError("Canlı benzin fiyatı alınamadı, güncel KKTC ortalama fiyatı kullanılıyor.");
-      setFuelPriceTL(DEFAULT_KKTC_FUEL_PRICE_TL);
-      setSource("fallback");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchFuelPrice();
-  }, [fetchFuelPrice]);
-
+export function useFuelPrice() {
   return {
-    fuelPriceTL,
-    source,
-    isLoading,
-    error,
-    refresh: fetchFuelPrice,
+    fuelPriceTL: KKTC_FUEL_PRICES.gasoline95,
+    prices: KKTC_FUEL_PRICES,
+    isFixed: true,
   };
 }
