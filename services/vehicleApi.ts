@@ -1,4 +1,5 @@
 import { Car } from "@/types";
+import localCarsData from "@/data/kktc_popular_cars.json";
 
 /**
  * Dinamik İnternet Araç Arama Servisi
@@ -123,45 +124,65 @@ async function carQueryFetch(url: string): Promise<string | null> {
 
 const BASE = "https://www.carqueryapi.com/api/0.3/";
 
-/** Markaları çek */
+// Cast local JSON data
+const LOCAL_CARS = localCarsData as Record<string, Record<string, Record<string, EngineOption[]>>>;
+
+/** Markaları çek (Lokal JSON + API Birleşimi) */
 export async function fetchMakesOnline(): Promise<string[]> {
+  const localMakes = Object.keys(LOCAL_CARS);
+
   try {
     const text = await carQueryFetch(`${BASE}?cmd=getMakes`);
     if (text) {
       const data = parseCarQuery(text) as { Makes?: CarQueryMake[] };
       if (data.Makes?.length) {
-        return data.Makes.map((m) => m.make_display).sort();
+        const apiMakes = data.Makes.map((m) => m.make_display);
+        return Array.from(new Set([...localMakes, ...apiMakes])).sort();
       }
     }
   } catch (err) {
     console.warn("Marka listesi çekilemedi:", err);
   }
-  return POPULAR_MAKES;
+  return Array.from(new Set([...localMakes, ...POPULAR_MAKES])).sort();
 }
 
-/** Marka seçilince modelleri çek */
+/** Marka seçilince modelleri çek (Lokal JSON + API Birleşimi) */
 export async function fetchModelsOnline(make: string): Promise<string[]> {
+  // Try exact match or case-insensitive match for local models
+  const makeKey = Object.keys(LOCAL_CARS).find(k => k.toLowerCase() === make.toLowerCase());
+  const localModels = makeKey ? Object.keys(LOCAL_CARS[makeKey]) : [];
+
   try {
     const url = `${BASE}?cmd=getModels&make=${encodeURIComponent(make.toLowerCase())}`;
     const text = await carQueryFetch(url);
     if (text) {
       const data = parseCarQuery(text) as { Models?: CarQueryModel[] };
       if (data.Models?.length) {
-        return data.Models.map((m) => m.model_name).sort();
+        const apiModels = data.Models.map((m) => m.model_name);
+        return Array.from(new Set([...localModels, ...apiModels])).sort();
       }
     }
   } catch (err) {
     console.warn("Model listesi çekilemedi:", err);
   }
-  // Fallback
-  return FALLBACK_MODELS[make] ?? [];
+  
+  const fallbackModels = FALLBACK_MODELS[make] ?? [];
+  return Array.from(new Set([...localModels, ...fallbackModels])).sort();
 }
 
-/** Model seçilince üretim yıllarını çek */
+/** Model seçilince üretim yıllarını çek (Önce Lokal JSON, sonra API) */
 export async function fetchYearsOnline(make: string, model: string): Promise<number[]> {
+  const makeKey = Object.keys(LOCAL_CARS).find(k => k.toLowerCase() === make.toLowerCase());
+  if (makeKey) {
+    const modelKey = Object.keys(LOCAL_CARS[makeKey]).find(m => m.toLowerCase() === model.toLowerCase());
+    if (modelKey) {
+      const years = Object.keys(LOCAL_CARS[makeKey][modelKey]).map(Number).sort((a, b) => b - a);
+      if (years.length > 0) return years;
+    }
+  }
+
   try {
-    const url =
-      `${BASE}?cmd=getTrims&make=${encodeURIComponent(make.toLowerCase())}&model=${encodeURIComponent(model.toLowerCase())}`;
+    const url = `${BASE}?cmd=getTrims&make=${encodeURIComponent(make.toLowerCase())}&model=${encodeURIComponent(model.toLowerCase())}`;
     const text = await carQueryFetch(url);
     if (text) {
       const data = parseCarQuery(text) as { Trims?: CarQueryTrim[] };
@@ -170,11 +191,10 @@ export async function fetchYearsOnline(make: string, model: string): Promise<num
           ...new Set(
             data.Trims.map((t) => parseInt(t.model_year)).filter((y) => !isNaN(y))
           ),
-        ].sort((a, b) => a - b); // Küçükten büyüğe sırala
+        ].sort((a, b) => a - b);
 
         if (allYears.length === 0) return fallbackYears();
 
-        // Yeni kasa (Generation) tespiti
         const generationYears: number[] = [];
         let lastGenYear = -1;
         let prevYear = -1;
@@ -184,7 +204,6 @@ export async function fetchYearsOnline(make: string, model: string): Promise<num
             generationYears.push(y);
             lastGenYear = y;
           } else {
-            // Eğer üretimde boşluk varsa (y > prevYear + 1) veya son kasadan bu yana 4 yıl geçtiyse
             if (y > prevYear + 1 || y - lastGenYear >= 4) {
               generationYears.push(y);
               lastGenYear = y;
@@ -193,7 +212,7 @@ export async function fetchYearsOnline(make: string, model: string): Promise<num
           prevYear = y;
         }
 
-        return generationYears.sort((a, b) => b - a); // Büyükten küçüğe sıralayarak döndür
+        return generationYears.sort((a, b) => b - a);
       }
     }
   } catch (err) {
@@ -211,15 +230,23 @@ export interface EngineOption {
   label: string;
 }
 
-/** Yıl seçilince motor seçeneklerini çek */
+/** Yıl seçilince motor seçeneklerini çek (Önce Lokal JSON, sonra API) */
 export async function fetchEnginesOnline(
   make: string,
   model: string,
   year: number
 ): Promise<EngineOption[]> {
+  const makeKey = Object.keys(LOCAL_CARS).find(k => k.toLowerCase() === make.toLowerCase());
+  if (makeKey) {
+    const modelKey = Object.keys(LOCAL_CARS[makeKey]).find(m => m.toLowerCase() === model.toLowerCase());
+    if (modelKey) {
+      const engineOpts = LOCAL_CARS[makeKey][modelKey][year.toString()];
+      if (engineOpts && engineOpts.length > 0) return engineOpts;
+    }
+  }
+
   try {
-    const url =
-      `${BASE}?cmd=getTrims&make=${encodeURIComponent(make.toLowerCase())}&model=${encodeURIComponent(model.toLowerCase())}&year=${year}`;
+    const url = `${BASE}?cmd=getTrims&make=${encodeURIComponent(make.toLowerCase())}&model=${encodeURIComponent(model.toLowerCase())}&year=${year}`;
     const text = await carQueryFetch(url);
     if (text) {
       const data = parseCarQuery(text) as { Trims?: CarQueryTrim[] };
@@ -252,7 +279,6 @@ export async function fetchEnginesOnline(
     console.warn("Motor seçenekleri çekilemedi:", err);
   }
 
-  // Fallback: akıllı varsayılan seçenekler
   return buildFallbackEngines(make, model);
 }
 

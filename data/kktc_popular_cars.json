@@ -1,0 +1,98 @@
+{
+  "Suzuki": {
+    "Swift": {
+      "2024": [
+        { "cc": 1200, "fuelType": "Hibrit", "weightKg": 990, "fuelConsumption": 4.3, "label": "1200 cc Hibrit", "trim": "Mild Hybrid" },
+        { "cc": 1200, "fuelType": "Benzin", "weightKg": 960, "fuelConsumption": 4.8, "label": "1200 cc Benzin", "trim": "GL" }
+      ],
+      "2017": [
+        { "cc": 1200, "fuelType": "Benzin", "weightKg": 940, "fuelConsumption": 5.2, "label": "1200 cc Benzin", "trim": "GLX" },
+        { "cc": 1000, "fuelType": "Benzin", "weightKg": 900, "fuelConsumption": 4.8, "label": "1000 cc Benzin", "trim": "GL" }
+      ],
+      "2010": [
+        { "cc": 1300, "fuelType": "Benzin", "weightKg": 1050, "fuelConsumption": 6.5, "label": "1300 cc Benzin", "trim": "GL" }
+      ]
+    },
+    "Vitara": {
+      "2020": [
+        { "cc": 1400, "fuelType": "Hibrit", "weightKg": 1240, "fuelConsumption": 5.5, "label": "1400 cc Hibrit", "trim": "Boosterjet" }
+      ],
+      "2016": [
+        { "cc": 1600, "fuelType": "Benzin", "weightKg": 1150, "fuelConsumption": 6.0, "label": "1600 cc Benzin", "trim": "GL+" }
+      ]
+    }
+  },
+  "Mazda": {
+    "Demio": {
+      "2020": [
+        { "cc": 1500, "fuelType": "Benzin", "weightKg": 1060, "fuelConsumption": 5.3, "label": "1500 cc Benzin", "trim": "Skyactiv-G" },
+        { "cc": 1500, "fuelType": "Dizel", "weightKg": 1130, "fuelConsumption": 4.5, "label": "1500 cc Dizel", "trim": "Skyactiv-D" }
+      ],
+      "2014": [
+        { "cc": 1300, "fuelType": "Benzin", "weightKg": 1010, "fuelConsumption": 5.5, "label": "1300 cc Benzin", "trim": "Skyactiv-G" }
+      ]
+    },
+    "Axela": {
+      "2019": [
+        { "cc": 1500, "fuelType": "Benzin", "weightKg": 1350, "fuelConsumption": 6.0, "label": "1500 cc Benzin", "trim": "Skyactiv-G" }
+      ],
+      "2014": [
+        { "cc": 1500, "fuelType": "Benzin", "weightKg": 1280, "fuelConsumption": 6.2, "label": "1500 cc Benzin", "trim": "Skyactiv-G" }
+      ]
+    }
+  },
+  "Toyota": {
+    "Vitz": {
+      "2020": [
+        { "cc": 1500, "fuelType": "Hibrit", "weightKg": 1090, "fuelConsumption": 3.8, "label": "1500 cc Hibrit", "trim": "Hybrid F" },
+        { "cc": 1000, "fuelType": "Benzin", "weightKg": 970, "fuelConsumption": 5.0, "label": "1000 cc Benzin", "trim": "F" }
+      ],
+      "2015": [
+        { "cc": 1300, "fuelType": "Benzin", "weightKg": 1000, "fuelConsumption": 5.2, "label": "1300 cc Benzin", "trim": "F" },
+        { "cc": 1000, "fuelType": "Benzin", "weightKg": 970, "fuelConsumption": 5.4, "label": "1000 cc Benzin", "trim": "F" }
+      ]
+    },
+    "Aqua": {
+      "2021": [
+        { "cc": 1500, "fuelType": "Hibrit", "weightKg": 1130, "fuelConsumption": 3.5, "label": "1500 cc Hibrit", "trim": "G" }
+      ],
+      "2015": [
+        { "cc": 1500, "fuelType": "Hibrit", "weightKg": 1080, "fuelConsumption": 3.7, "label": "1500 cc Hibrit", "trim": "S" }
+      ]
+    }
+  },
+  "Honda": {
+    "Fit": {
+      "2021": [
+        { "cc": 1500, "fuelType": "Hibrit", "weightKg": 1180, "fuelConsumption": 3.9, "label": "1500 cc Hibrit", "trim": "e:HEV" }
+      ],
+      "2015": [
+        { "cc": 1500, "fuelType": "Hibrit", "weightKg": 1140, "fuelConsumption": 4.1, "label": "1500 cc Hibrit", "trim": "Hybrid L" },
+        { "cc": 1300, "fuelType": "Benzin", "weightKg": 1050, "fuelConsumption": 5.0, "label": "1300 cc Benzin", "trim": "G" }
+      ]
+    },
+    "Vezel": {
+      "2021": [
+        { "cc": 1500, "fuelType": "Hibrit", "weightKg": 1350, "fuelConsumption": 4.5, "label": "1500 cc Hibrit", "trim": "e:HEV Z" }
+      ],
+      "2015": [
+        { "cc": 1500, "fuelType": "Hibrit", "weightKg": 1300, "fuelConsumption": 4.8, "label": "1500 cc Hibrit", "trim": "Hybrid Z" }
+      ]
+    }
+  },
+  "BMW": {
+    "3 Series": {
+      "2020": [
+        { "cc": 2000, "fuelType": "Benzin", "weightKg": 1525, "fuelConsumption": 6.8, "label": "2000 cc Benzin", "trim": "320i" },
+        { "cc": 2000, "fuelType": "Dizel", "weightKg": 1530, "fuelConsumption": 4.9, "label": "2000 cc Dizel", "trim": "320d" }
+      ],
+      "2015": [
+        { "cc": 2000, "fuelType": "Benzin", "weightKg": 1495, "fuelConsumption": 7.0, "label": "2000 cc Benzin", "trim": "320i" },
+        { "cc": 2000, "fuelType": "Dizel", "weightKg": 1505, "fuelConsumption": 5.1, "label": "2000 cc Dizel", "trim": "320d" }
+      ],
+      "2008": [
+        { "cc": 2000, "fuelType": "Benzin", "weightKg": 1435, "fuelConsumption": 7.5, "label": "2000 cc Benzin", "trim": "320i" }
+      ]
+    }
+  }
+}
