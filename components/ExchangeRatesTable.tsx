@@ -48,24 +48,34 @@ export function ExchangeRatesTable() {
       </CardHeader>
       <CardContent className="p-0">
         <table className="w-full text-sm text-left">
+          <thead className="text-[10px] uppercase text-slate-500 bg-slate-50/50">
+            <tr>
+              <th className="py-1.5 px-4 font-semibold border-b border-slate-100">Döviz</th>
+              <th className="py-1.5 px-4 text-right font-semibold border-b border-slate-100">Alış</th>
+              <th className="py-1.5 px-4 text-right font-semibold border-b border-slate-100">Satış</th>
+            </tr>
+          </thead>
           <tbody>
             <tr className="border-b border-slate-100 hover:bg-slate-50/50">
               <td className="py-2.5 px-4 font-medium text-slate-700 flex items-center gap-2">
-                <PoundSterling className="h-3.5 w-3.5 text-slate-400" /> Sterlin (GBP)
+                <PoundSterling className="h-3.5 w-3.5 text-slate-400" /> GBP
               </td>
-              <td className="py-2.5 px-4 text-right font-bold text-slate-900">{rates.gbp.toFixed(4)} ₺</td>
+              <td className="py-2.5 px-4 text-right text-emerald-600 font-medium">{(rates.gbp * 0.995).toFixed(4)} ₺</td>
+              <td className="py-2.5 px-4 text-right text-red-600 font-bold">{(rates.gbp * 1.005).toFixed(4)} ₺</td>
             </tr>
             <tr className="border-b border-slate-100 hover:bg-slate-50/50">
               <td className="py-2.5 px-4 font-medium text-slate-700 flex items-center gap-2">
-                <DollarSign className="h-3.5 w-3.5 text-slate-400" /> Dolar (USD)
+                <DollarSign className="h-3.5 w-3.5 text-slate-400" /> USD
               </td>
-              <td className="py-2.5 px-4 text-right font-bold text-slate-900">{rates.usd.toFixed(4)} ₺</td>
+              <td className="py-2.5 px-4 text-right text-emerald-600 font-medium">{(rates.usd * 0.995).toFixed(4)} ₺</td>
+              <td className="py-2.5 px-4 text-right text-red-600 font-bold">{(rates.usd * 1.005).toFixed(4)} ₺</td>
             </tr>
             <tr className="border-b border-slate-100 hover:bg-slate-50/50">
               <td className="py-2.5 px-4 font-medium text-slate-700 flex items-center gap-2">
-                <Euro className="h-3.5 w-3.5 text-slate-400" /> Euro (EUR)
+                <Euro className="h-3.5 w-3.5 text-slate-400" /> EUR
               </td>
-              <td className="py-2.5 px-4 text-right font-bold text-slate-900">{rates.eur.toFixed(4)} ₺</td>
+              <td className="py-2.5 px-4 text-right text-emerald-600 font-medium">{(rates.eur * 0.995).toFixed(4)} ₺</td>
+              <td className="py-2.5 px-4 text-right text-red-600 font-bold">{(rates.eur * 1.005).toFixed(4)} ₺</td>
             </tr>
           </tbody>
         </table>
