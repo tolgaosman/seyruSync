@@ -298,12 +298,25 @@ function buildFallbackEngines(make: string, model: string): EngineOption[] {
     { cc: 2000, fuelType: "Hibrit", trim: "", weightKg: 1600, fuelConsumption: 5.5, label: "2000 cc Hibrit" },
   ];
 
-  // Lüks / Spor / Büyük SUV
+  // Ekstra Ağır Lüks / Büyük SUV (7 Serisi, S-Class, X5, Range Rover vs.)
+  const isExtraHeavy = ["7 series", "8 series", "s-class", "a8", "q7", "q8", "x5", "x6", "x7", "gle", "gls", "g-class", "range rover", "cayenne", "touareg", "xc90", "land cruiser", "lx"].some(k => full.includes(k));
+  // Standart Lüks / Spor / D-E Segment (3 Serisi, 5 Serisi, C-Class, E-Class, X3 vb.)
   const isLargeLuxury = ["bmw", "mercedes", "audi", "lexus", "land rover", "porsche", "volvo", "jaguar", "ferrari", "bentley", "maserati"].some(k => full.includes(k));
   // Çok Hafif / A Segmenti
   const isUltraLight = ["swift", "picanto", "i10", "aygo", "c1", "108"].some(k => full.includes(k));
   // Kompakt / Küçük
   const isSmall = ["i20", "fiesta", "corsa", "clio", "polo", "yaris", "micra", "500", "sandero", "demio"].some(k => full.includes(k));
+
+  if (isExtraHeavy) {
+    return [
+      { cc: 2000, fuelType: "Benzin", trim: "", weightKg: 1950, fuelConsumption: 9.5, label: "2000 cc Benzin" },
+      { cc: 3000, fuelType: "Benzin", trim: "", weightKg: 2150, fuelConsumption: 12.0, label: "3000 cc Benzin" },
+      { cc: 4000, fuelType: "Benzin", trim: "", weightKg: 2300, fuelConsumption: 14.5, label: "4000 cc Benzin" },
+      { cc: 2000, fuelType: "Dizel", trim: "", weightKg: 2000, fuelConsumption: 7.5, label: "2000 cc Dizel" },
+      { cc: 3000, fuelType: "Dizel", trim: "", weightKg: 2200, fuelConsumption: 8.5, label: "3000 cc Dizel" },
+      { cc: 3000, fuelType: "Hibrit", trim: "", weightKg: 2350, fuelConsumption: 6.5, label: "3000 cc Hibrit" },
+    ];
+  }
 
   if (isLargeLuxury) {
     return [
