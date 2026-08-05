@@ -39,35 +39,35 @@ export const POPULAR_MAKES = [
 
 /** Popüler marka modelleri – CarQuery başarısız olursa kullanılır */
 const FALLBACK_MODELS: Record<string, string[]> = {
-  "Toyota":         ["Corolla", "Camry", "RAV4", "Yaris", "C-HR", "Land Cruiser", "Prius", "Hilux", "Auris", "Avensis"],
-  "Volkswagen":     ["Golf", "Polo", "Passat", "Tiguan", "T-Roc", "Touareg", "Arteon", "ID.3", "ID.4", "Caddy"],
-  "BMW":            ["1 Series", "2 Series", "3 Series", "4 Series", "5 Series", "7 Series", "8 Series", "X1", "X3", "X5", "X6", "iX"],
-  "Mercedes-Benz":  ["A-Class", "B-Class", "C-Class", "E-Class", "S-Class", "GLA", "GLC", "GLE", "EQA", "EQC"],
-  "Honda":          ["Civic", "CR-V", "HR-V", "Jazz", "Accord", "e:Ny1", "ZR-V"],
-  "Ford":           ["Fiesta", "Focus", "Kuga", "Puma", "Mustang Mach-E", "Explorer", "EcoSport", "Mondeo", "Transit"],
-  "Nissan":         ["Micra", "Juke", "Qashqai", "X-Trail", "Leaf", "Ariya", "Navara", "Note"],
-  "Hyundai":        ["i10", "i20", "i30", "Tucson", "Santa Fe", "Kona", "IONIQ 5", "IONIQ 6"],
-  "Kia":            ["Picanto", "Rio", "Ceed", "Sportage", "Sorento", "EV6", "Stonic", "Niro"],
-  "Audi":           ["A1", "A3", "A4", "A5", "A6", "Q3", "Q5", "Q7", "e-tron", "e-tron GT"],
-  "Peugeot":        ["108", "208", "308", "508", "2008", "3008", "5008", "e-208", "e-2008"],
-  "Renault":        ["Clio", "Megane", "Kadjar", "Captur", "Zoe", "Arkana", "Austral", "Scenic"],
-  "Suzuki":         ["Swift", "Vitara", "SX4 S-Cross", "Ignis", "Jimny", "Swace"],
-  "Mazda":          ["Mazda2", "Demio", "Mazda3", "Mazda6", "CX-3", "CX-5", "CX-30", "MX-5", "CX-60"],
-  "Volvo":          ["XC40", "XC60", "XC90", "S60", "S90", "V60", "V90", "C40"],
-  "Tesla":          ["Model 3", "Model S", "Model X", "Model Y", "Cybertruck"],
-  "Skoda":          ["Fabia", "Scala", "Octavia", "Superb", "Kamiq", "Karoq", "Kodiaq", "Enyaq"],
-  "Fiat":           ["500", "Panda", "Tipo", "500X", "500L", "500e"],
-  "Land Rover":     ["Discovery Sport", "Discovery", "Defender", "Range Rover Sport", "Range Rover Evoque", "Range Rover"],
-  "Porsche":        ["Cayenne", "Macan", "Panamera", "911", "Taycan", "Cayman", "Boxster"],
-  "Opel":           ["Corsa", "Astra", "Mokka", "Grandland", "Crossland", "Insignia"],
-  "Seat":           ["Ibiza", "Leon", "Arona", "Ateca", "Tarraco"],
-  "Citroën":        ["C1", "C3", "C4", "C5 X", "Berlingo", "ë-C4"],
-  "Dacia":          ["Sandero", "Duster", "Logan", "Jogger", "Spring"],
-  "Mitsubishi":     ["ASX", "Eclipse Cross", "Outlander", "L200"],
-  "Subaru":         ["Impreza", "Forester", "Outback", "XV", "BRZ", "Levorg"],
-  "Jeep":           ["Renegade", "Compass", "Wrangler", "Grand Cherokee", "Avenger"],
-  "Lexus":          ["IS", "ES", "NX", "RX", "UX", "LX", "GX"],
-  "Alfa Romeo":     ["Giulia", "Stelvio", "Tonale", "Giulietta"],
+  "Toyota": ["Corolla", "Camry", "RAV4", "Yaris", "C-HR", "Land Cruiser", "Prius", "Hilux", "Auris", "Avensis"],
+  "Volkswagen": ["Golf", "Polo", "Passat", "Tiguan", "T-Roc", "Touareg", "Arteon", "ID.3", "ID.4", "Caddy"],
+  "BMW": ["1 Series", "2 Series", "3 Series", "4 Series", "5 Series", "7 Series", "8 Series", "X1", "X3", "X5", "X6", "iX"],
+  "Mercedes-Benz": ["A-Class", "B-Class", "C-Class", "E-Class", "S-Class", "GLA", "GLC", "GLE", "EQA", "EQC"],
+  "Honda": ["Civic", "CR-V", "HR-V", "Jazz", "Accord", "e:Ny1", "ZR-V"],
+  "Ford": ["Fiesta", "Focus", "Kuga", "Puma", "Mustang Mach-E", "Explorer", "EcoSport", "Mondeo", "Transit"],
+  "Nissan": ["Micra", "Juke", "Qashqai", "X-Trail", "Leaf", "Ariya", "Navara", "Note"],
+  "Hyundai": ["i10", "i20", "i30", "Tucson", "Santa Fe", "Kona", "IONIQ 5", "IONIQ 6"],
+  "Kia": ["Picanto", "Rio", "Ceed", "Sportage", "Sorento", "EV6", "Stonic", "Niro"],
+  "Audi": ["A1", "A3", "A4", "A5", "A6", "Q3", "Q5", "Q7", "e-tron", "e-tron GT"],
+  "Peugeot": ["108", "208", "308", "508", "2008", "3008", "5008", "e-208", "e-2008"],
+  "Renault": ["Clio", "Megane", "Kadjar", "Captur", "Zoe", "Arkana", "Austral", "Scenic"],
+  "Suzuki": ["Swift", "Vitara", "SX4 S-Cross", "Ignis", "Jimny", "Swace"],
+  "Mazda": ["Demio", "Mazda2", "Mazda3", "Mazda6", "CX-3", "CX-5", "CX-30", "MX-5", "CX-60"],
+  "Volvo": ["XC40", "XC60", "XC90", "S60", "S90", "V60", "V90", "C40"],
+  "Tesla": ["Model 3", "Model S", "Model X", "Model Y", "Cybertruck"],
+  "Skoda": ["Fabia", "Scala", "Octavia", "Superb", "Kamiq", "Karoq", "Kodiaq", "Enyaq"],
+  "Fiat": ["500", "Panda", "Tipo", "500X", "500L", "500e"],
+  "Land Rover": ["Discovery Sport", "Discovery", "Defender", "Range Rover Sport", "Range Rover Evoque", "Range Rover"],
+  "Porsche": ["Cayenne", "Macan", "Panamera", "911", "Taycan", "Cayman", "Boxster"],
+  "Opel": ["Corsa", "Astra", "Mokka", "Grandland", "Crossland", "Insignia"],
+  "Seat": ["Ibiza", "Leon", "Arona", "Ateca", "Tarraco"],
+  "Citroën": ["C1", "C3", "C4", "C5 X", "Berlingo", "ë-C4"],
+  "Dacia": ["Sandero", "Duster", "Logan", "Jogger", "Spring"],
+  "Mitsubishi": ["ASX", "Eclipse Cross", "Outlander", "L200"],
+  "Subaru": ["Impreza", "Forester", "Outback", "XV", "BRZ", "Levorg"],
+  "Jeep": ["Renegade", "Compass", "Wrangler", "Grand Cherokee", "Avenger"],
+  "Lexus": ["IS", "ES", "NX", "RX", "UX", "LX", "GX"],
+  "Alfa Romeo": ["Giulia", "Stelvio", "Tonale", "Giulietta"],
 };
 
 /** Fallback yıl listesi (son 15 yıl) */
@@ -258,10 +258,10 @@ export async function fetchEnginesOnline(
 
 function buildFallbackEngines(make: string, model: string): EngineOption[] {
   const full = `${make} ${model}`.toLowerCase();
-  
+
   // Elektrikli ve Hibrit Özel Durumları
   const isElectric = ["tesla", "ioniq 5", "ioniq 6", "ev6", "id.3", "id.4", "e-tron", "ariya", "leaf", "model", "taycan", "eq"].some(k => full.includes(k));
-  const isHybrid   = ["prius", "yaris hybrid", "yaris cross", "jazz", "zoe", "niro hybrid", "tucson hybrid", "e:hev", "phev"].some(k => full.includes(k));
+  const isHybrid = ["prius", "yaris hybrid", "yaris cross", "jazz", "zoe", "niro hybrid", "tucson hybrid", "e:hev", "phev"].some(k => full.includes(k));
 
   if (isElectric) return [
     { cc: 0, fuelType: "Elektrik", trim: "", weightKg: 1950, fuelConsumption: 0, label: "Full Elektrik" },
@@ -284,8 +284,8 @@ function buildFallbackEngines(make: string, model: string): EngineOption[] {
       { cc: 1600, fuelType: "Benzin", trim: "", weightKg: 1550, fuelConsumption: 7.5, label: "1600 cc Benzin" },
       { cc: 2000, fuelType: "Benzin", trim: "", weightKg: 1650, fuelConsumption: 8.5, label: "2000 cc Benzin" },
       { cc: 3000, fuelType: "Benzin", trim: "", weightKg: 1850, fuelConsumption: 10.5, label: "3000 cc Benzin" },
-      { cc: 2000, fuelType: "Dizel",  trim: "", weightKg: 1700, fuelConsumption: 6.5, label: "2000 cc Dizel" },
-      { cc: 3000, fuelType: "Dizel",  trim: "", weightKg: 1900, fuelConsumption: 7.5, label: "3000 cc Dizel" },
+      { cc: 2000, fuelType: "Dizel", trim: "", weightKg: 1700, fuelConsumption: 6.5, label: "2000 cc Dizel" },
+      { cc: 3000, fuelType: "Dizel", trim: "", weightKg: 1900, fuelConsumption: 7.5, label: "3000 cc Dizel" },
       { cc: 2000, fuelType: "Hibrit", trim: "", weightKg: 1800, fuelConsumption: 5.5, label: "2000 cc Hibrit" },
     ];
   }
@@ -303,7 +303,7 @@ function buildFallbackEngines(make: string, model: string): EngineOption[] {
       { cc: 1000, fuelType: "Benzin", trim: "", weightKg: 1050, fuelConsumption: 5.0, label: "1000 cc Benzin" },
       { cc: 1200, fuelType: "Benzin", trim: "", weightKg: 1100, fuelConsumption: 5.5, label: "1200 cc Benzin" },
       { cc: 1400, fuelType: "Benzin", trim: "", weightKg: 1150, fuelConsumption: 6.0, label: "1400 cc Benzin" },
-      { cc: 1500, fuelType: "Dizel",  trim: "", weightKg: 1200, fuelConsumption: 4.5, label: "1500 cc Dizel" },
+      { cc: 1500, fuelType: "Dizel", trim: "", weightKg: 1200, fuelConsumption: 4.5, label: "1500 cc Dizel" },
     ];
   }
 
@@ -314,9 +314,9 @@ function buildFallbackEngines(make: string, model: string): EngineOption[] {
     { cc: 1500, fuelType: "Benzin", trim: "", weightKg: 1350, fuelConsumption: 6.8, label: "1500 cc Benzin" },
     { cc: 1600, fuelType: "Benzin", trim: "", weightKg: 1350, fuelConsumption: 7.0, label: "1600 cc Benzin" },
     { cc: 2000, fuelType: "Benzin", trim: "", weightKg: 1450, fuelConsumption: 8.0, label: "2000 cc Benzin" },
-    { cc: 1500, fuelType: "Dizel",  trim: "", weightKg: 1350, fuelConsumption: 5.0, label: "1500 cc Dizel" },
-    { cc: 1600, fuelType: "Dizel",  trim: "", weightKg: 1400, fuelConsumption: 5.2, label: "1600 cc Dizel" },
-    { cc: 2000, fuelType: "Dizel",  trim: "", weightKg: 1500, fuelConsumption: 5.8, label: "2000 cc Dizel" },
+    { cc: 1500, fuelType: "Dizel", trim: "", weightKg: 1350, fuelConsumption: 5.0, label: "1500 cc Dizel" },
+    { cc: 1600, fuelType: "Dizel", trim: "", weightKg: 1400, fuelConsumption: 5.2, label: "1600 cc Dizel" },
+    { cc: 2000, fuelType: "Dizel", trim: "", weightKg: 1500, fuelConsumption: 5.8, label: "2000 cc Dizel" },
     { cc: 1800, fuelType: "Hibrit", trim: "", weightKg: 1400, fuelConsumption: 5.0, label: "1800 cc Hibrit" },
   ];
 }
@@ -324,8 +324,8 @@ function buildFallbackEngines(make: string, model: string): EngineOption[] {
 function normalizeFuelType(raw: string): "Benzin" | "Dizel" | "Hibrit" | "Elektrik" {
   const l = raw.toLowerCase();
   if (l.includes("electric")) return "Elektrik";
-  if (l.includes("hybrid"))   return "Hibrit";
-  if (l.includes("diesel"))   return "Dizel";
+  if (l.includes("hybrid")) return "Hibrit";
+  if (l.includes("diesel")) return "Dizel";
   return "Benzin";
 }
 
