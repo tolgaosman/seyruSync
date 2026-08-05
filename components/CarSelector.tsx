@@ -249,7 +249,7 @@ export function CarSelector({
                               s.loadingModels
                                 ? "Yükleniyor..."
                                 : !s.make
-                                ? "Önce marka"
+                                ? "Model (Önce marka)"
                                 : "Model seçin..."
                             }
                           />
@@ -287,7 +287,7 @@ export function CarSelector({
                               s.loadingYears
                                 ? "Yükleniyor..."
                                 : !s.model
-                                ? "Önce model"
+                                ? "Kasa Yılı (Önce model)"
                                 : "Kasa yılı seçin..."
                             }
                           />
@@ -326,7 +326,7 @@ export function CarSelector({
                               s.loadingEngines
                                 ? "Yükleniyor..."
                                 : !s.year
-                                ? "Önce yıl"
+                                ? "Motor Hacmi (Önce yıl)"
                                 : "Motor hacmi seçin..."
                             }
                           />
