@@ -1,10 +1,14 @@
-/* Google Fonts — must be first */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
 
 @import "tailwindcss";
 
 :root {
-  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, sans-serif;
+  --color-page-bg: #f6f5f0;
+  --color-forest: #063b28;
+  --color-sage: #8ca797;
+  --color-sand: #e5d8c5;
 }
 
 *,
@@ -14,14 +18,18 @@
 }
 
 html {
-  font-family: var(--font-inter);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+.font-serif {
+  font-family: var(--font-serif);
+}
+
 body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #f6f5f0;
+  color: #111814;
   min-height: 100vh;
 }
 
@@ -31,19 +39,19 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #ede9df;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #c5bfae;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #063b28;
 }
 
 /* Smooth transitions */
 * {
-  transition-property: color, background-color, border-color;
+  transition-property: color, background-color, border-color, box-shadow;
   transition-duration: 150ms;
   transition-timing-function: ease;
 }

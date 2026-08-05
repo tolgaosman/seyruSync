@@ -8,16 +8,18 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-slate-900 text-white hover:bg-slate-800",
+          "border-transparent bg-[#063b28] text-white hover:bg-[#0a4d35]",
         secondary:
-          "border-transparent bg-slate-100 text-slate-900 hover:bg-slate-200",
+          "border-transparent bg-[#f0eee6] text-[#111814] hover:bg-[#e5e2d8]",
         destructive:
-          "border-transparent bg-red-500 text-white hover:bg-red-600",
-        outline: "text-slate-900",
-        barem1: "bg-emerald-100 text-emerald-800 border-emerald-300",
-        barem2: "bg-yellow-100 text-yellow-800 border-yellow-300",
-        barem3: "bg-orange-100 text-orange-800 border-orange-300",
-        barem4: "bg-red-100 text-red-800 border-red-300",
+          "border-transparent bg-[#b84a32] text-white hover:bg-[#a13b25]",
+        outline: "border-[#e2dec5] text-[#111814] bg-white/50",
+        barem1: "bg-[#e3ece6] text-[#1c4430] border-[#c8dcd0]",
+        barem2: "bg-[#f6f0e3] text-[#624a1e] border-[#e6d6b6]",
+        barem3: "bg-[#faebe4] text-[#7a3219] border-[#f2cbbe]",
+        barem4: "bg-[#fce8e4] text-[#8c2219] border-[#f7c2b9]",
+        optimal: "bg-[#d9e8de] text-[#0d4829] border-transparent font-bold",
+        sand: "bg-[#f0eee6] text-[#4a3a25] border-[#e2dec5]",
       },
     },
     defaultVariants: {
