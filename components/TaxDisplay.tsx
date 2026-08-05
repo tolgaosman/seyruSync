@@ -3,6 +3,7 @@
 import { Car } from "@/types";
 import {
   calculateRoadTax,
+  calculateInsurance,
   formatTL,
   formatGBP,
   getBaremColors,
@@ -138,22 +139,20 @@ export function TaxDisplay({ cars, gbpRate, onRemove }: TaxDisplayProps) {
                   </p>
                 </div>
 
-                {/* Rate */}
-                <div
-                  className={`rounded-lg p-3 ${colors.bg} border ${colors.border}`}
-                >
+                {/* Estimated Annual Insurance */}
+                <div className="rounded-lg p-3 bg-emerald-50 border border-emerald-200">
                   <div className="flex items-center gap-1 mb-1">
-                    <TrendingUp className={`h-3.5 w-3.5 ${colors.text}`} />
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                     <span className="text-xs font-semibold text-slate-500">
-                      Oran
+                      Tahm. Yıllık Sigorta
                     </span>
                   </div>
-                  <p className={`text-lg font-bold ${colors.text}`}>
-                    {baremEntry.ratePerKg}
-                    <span className="text-sm font-normal ml-1">TL/kg</span>
+                  <p className="text-lg font-bold text-emerald-700">
+                    {calculateInsurance(car.priceGBP, gbpRate, car.engineCC).totalAnnualInsurance.toLocaleString("tr-TR")}
+                    <span className="text-sm font-normal ml-1">TL</span>
                   </p>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Vergi katsayısı
+                    Trafik ({calculateInsurance(car.priceGBP, gbpRate, car.engineCC).trafficInsurance.toLocaleString("tr-TR")} ₺) + Kasko (~%{1.5})
                   </p>
                 </div>
               </div>

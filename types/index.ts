@@ -18,11 +18,18 @@ export interface TaxResult {
   ratePerKg: number;
 }
 
+export interface InsuranceEstimate {
+  trafficInsurance: number; // Yıllık zorunlu trafik sigortası (TL)
+  kaskoInsurance: number;   // Yıllık kasko sigortası (TL)
+  totalAnnualInsurance: number; // Toplam yıllık sigorta (TL)
+}
+
 export interface TCOBreakdown {
   vehiclePriceGBP: number; // Araç fiyatı (£)
   vehiclePriceTL: number;  // Araç fiyatı (TL) — o günün kuru ile
   fiveYearTax: number;     // TL
   fiveYearFuel: number;    // TL
+  fiveYearInsurance?: number; // 5 yıllık sigorta (TL)
   total: number;           // TL (araç TL + 5 yıl vergi + 5 yıl yakıt)
 }
 

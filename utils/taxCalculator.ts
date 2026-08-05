@@ -73,6 +73,36 @@ export function calculateRoadTax(weightKg: number): TaxResult {
 }
 
 /**
+ * KKTC araç sigortası tahmini (Zorunlu Trafik Sigortası + Kasko)
+ * @param priceGBP Araç fiyatı (£)
+ * @param gbpRate  Canlı kur (1 GBP = X TL)
+ * @param engineCC Motor hacmi (cc)
+ */
+export function calculateInsurance(
+  priceGBP: number,
+  gbpRate: number = FALLBACK_GBP_RATE,
+  engineCC?: number
+) {
+  const priceTL = priceGBP * gbpRate;
+
+  // Zorunlu Trafik Sigortası (Motor cc'ye göre KKTC ortalama tarifesi)
+  let trafficInsurance = 5500;
+  if (engineCC) {
+    if (engineCC > 2000) trafficInsurance = 7000;
+    else if (engineCC > 1600) trafficInsurance = 6200;
+  }
+
+  // Kasko Sigortası (Araç bedelinin yıllık ortalama %1.5'i)
+  const kaskoInsurance = Math.round(priceTL * 0.015);
+
+  return {
+    trafficInsurance,
+    kaskoInsurance,
+    totalAnnualInsurance: trafficInsurance + kaskoInsurance,
+  };
+}
+
+/**
  * 5 Yıllık Toplam Sahip Olma Maliyeti (TCO) hesaplar.
  *
  * - Araç fiyatı GBP → TL çevirisi `gbpRate` ile yapılır
