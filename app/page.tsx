@@ -101,7 +101,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
       {/* ─── HEADER ─── */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+        <div className="max-w-[1440px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="bg-blue-600 text-white p-2 rounded-xl shadow-sm">
@@ -160,8 +160,8 @@ export default function Home() {
       </header>
 
       {/* ─── MAIN ─── */}
-      <main className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8 items-start">
+      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr_320px] gap-6 xl:gap-8 items-start">
 
           {/* ══════════════════════════════════════════════════
               SOL SÜTUN — Giriş Paneli
@@ -227,15 +227,9 @@ export default function Home() {
           </aside>
 
           {/* ══════════════════════════════════════════════════
-              SAĞ SÜTUN — Sonuçlar Paneli
+              ORTA SÜTUN — Sonuçlar Paneli
           ══════════════════════════════════════════════════ */}
           <section className="space-y-8">
-            
-            {/* Akaryakıt Fiyatları Tablosu */}
-            <FuelPricesTable />
-            
-            {/* Döviz Kurları ve Çevirici Tablosu */}
-            <ExchangeRatesTable />
 
             {/* Boş Durum */}
             {allCars.length === 0 && (
@@ -310,6 +304,24 @@ export default function Home() {
               </div>
             )}
           </section>
+
+          {/* ══════════════════════════════════════════════════
+              SAĞ SÜTUN — Widgetlar
+          ══════════════════════════════════════════════════ */}
+          <aside className="space-y-6 lg:sticky lg:top-24 hidden lg:block">
+            {/* Akaryakıt Fiyatları Tablosu */}
+            <FuelPricesTable />
+            
+            {/* Döviz Kurları ve Çevirici Tablosu */}
+            <ExchangeRatesTable />
+          </aside>
+          
+          {/* Mobil Cihazlar İçin Widgetlar - Alt Kısımda */}
+          <div className="space-y-6 lg:hidden mt-8">
+            <FuelPricesTable />
+            <ExchangeRatesTable />
+          </div>
+
         </div>
       </main>
 
