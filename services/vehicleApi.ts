@@ -1,16 +1,13 @@
 import { Car } from "@/types";
 
 /**
- * Dinamik İnternet Araç Arama Servisi (CarQuery / Open Vehicle API)
- * Hardcoded veritabanı kullanılmaz; tüm marka, model ve teknik veriler
- * internet üzerinden canlı API sorgulamaları ile çekilir.
+ * Dinamik İnternet Araç Arama Servisi (CarQuery API)
+ * Marka → Model → Yıl → Motor Hacmi (cc) sırayla sorgulanır.
  */
 
 export interface CarQueryMake {
   make_id: string;
   make_display: string;
-  make_is_common: string;
-  make_country: string;
 }
 
 export interface CarQueryModel {
@@ -31,7 +28,7 @@ export interface CarQueryTrim {
   model_fuel_type: string | null;
 }
 
-/** Popüler Markalar Listesi (Dinamik API'den ilk yüklemede doldurulur) */
+/** Popüler markalar (CarQuery'den çekilemediyse fallback) */
 export const POPULAR_MAKES = [
   "Toyota",
   "Volkswagen",
@@ -53,140 +50,209 @@ export const POPULAR_MAKES = [
   "Fiat",
   "Land Rover",
   "Porsche",
+  "Opel",
+  "Seat",
+  "Citroën",
+  "Dacia",
+  "Mitsubishi",
+  "Subaru",
+  "Lexus",
+  "Infiniti",
+  "Alfa Romeo",
+  "Jeep",
 ];
 
-/**
- * CarQuery API üzerinden canlı markaları çeker
- */
+/** JSONP / JSON temizleyici */
+function parseCarQuery(text: string): unknown {
+  const clean = text.replace(/^[^(]*\(/, "").replace(/\);?\s*$/, "");
+  return JSON.parse(clean);
+}
+
+/** Markaları çek */
 export async function fetchMakesOnline(): Promise<string[]> {
   try {
-    const res = await fetch(
-      "https://www.carqueryapi.com/api/0.3/?cmd=getMakes"
-    );
-    if (!res.ok) throw new Error("API yanıt vermedi");
-    const text = await res.text();
-    // JSONP or clean JSON response
-    const cleanJson = text.replace(/^[^(]*\(/, "").replace(/\);?$/, "");
-    const data = JSON.parse(cleanJson);
-    if (data.Makes && Array.isArray(data.Makes)) {
-      return data.Makes.map((m: { make_display: string }) => m.make_display);
+    const res = await fetch("https://www.carqueryapi.com/api/0.3/?cmd=getMakes");
+    if (!res.ok) throw new Error("getMakes failed");
+    const data = parseCarQuery(await res.text()) as { Makes?: CarQueryMake[] };
+    if (data.Makes?.length) {
+      return data.Makes.map((m) => m.make_display);
     }
   } catch (err) {
-    console.warn("Canlı marka listesi API'den çekilemedi, varsayılan liste kullanılıyor:", err);
+    console.warn("Marka listesi çekilemedi:", err);
   }
   return POPULAR_MAKES;
 }
 
-/**
- * CarQuery API üzerinden seçilen markanın modellerini çeker
- */
+/** Marka seçilince modelleri çek */
 export async function fetchModelsOnline(make: string): Promise<string[]> {
   try {
     const res = await fetch(
-      `https://www.carqueryapi.com/api/0.3/?cmd=getModels&make=${encodeURIComponent(
-        make.toLowerCase()
-      )}`
+      `https://www.carqueryapi.com/api/0.3/?cmd=getModels&make=${encodeURIComponent(make.toLowerCase())}`
     );
-    if (!res.ok) throw new Error("Model API yanıt vermedi");
-    const text = await res.text();
-    const cleanJson = text.replace(/^[^(]*\(/, "").replace(/\);?$/, "");
-    const data = JSON.parse(cleanJson);
-    if (data.Models && Array.isArray(data.Models)) {
-      return data.Models.map((m: { model_name: string }) => m.model_name);
+    if (!res.ok) throw new Error("getModels failed");
+    const data = parseCarQuery(await res.text()) as { Models?: CarQueryModel[] };
+    if (data.Models?.length) {
+      return data.Models.map((m) => m.model_name);
     }
   } catch (err) {
-    console.warn("Canlı model listesi API'den çekilemedi:", err);
+    console.warn("Model listesi çekilemedi:", err);
   }
   return [];
 }
 
-/**
- * Dinamik olarak girilen marka/model aramasına göre internetten canlı araç özellikleri türetir
- */
-export async function fetchVehicleSpecsOnline(
-  make: string,
-  model: string,
-  year: number = new Date().getFullYear()
-): Promise<Car> {
-  const carId = `online-${make.toLowerCase()}-${model
-    .toLowerCase()
-    .replace(/\s+/g, "-")}-${Date.now()}`;
-
-  let weightKg = 1350;
-  let priceGBP = 22000;
-  let avgFuelConsumption = 6.0;
-  let fuelType: "Benzin" | "Dizel" | "Hibrit" | "Elektrik" = "Benzin";
-  let engineCC: number | undefined = 1498;
-
+/** Model seçilince üretim yıllarını çek (benzersiz, sıralı) */
+export async function fetchYearsOnline(make: string, model: string): Promise<number[]> {
   try {
-    // CarQuery trim specs API call
     const res = await fetch(
       `https://www.carqueryapi.com/api/0.3/?cmd=getTrims&make=${encodeURIComponent(
         make.toLowerCase()
       )}&model=${encodeURIComponent(model.toLowerCase())}`
     );
-    if (res.ok) {
-      const text = await res.text();
-      const cleanJson = text.replace(/^[^(]*\(/, "").replace(/\);?$/, "");
-      const data = JSON.parse(cleanJson);
-
-      if (data.Trims && data.Trims.length > 0) {
-        const trim: CarQueryTrim = data.Trims[0];
-        if (trim.model_weight_kg && !isNaN(Number(trim.model_weight_kg))) {
-          weightKg = Math.round(Number(trim.model_weight_kg));
-        }
-        if (trim.model_engine_cc && !isNaN(Number(trim.model_engine_cc))) {
-          engineCC = Math.round(Number(trim.model_engine_cc));
-        }
-        if (trim.model_lkm_mixed && !isNaN(Number(trim.model_lkm_mixed))) {
-          avgFuelConsumption = Number(Number(trim.model_lkm_mixed).toFixed(1));
-        }
-        if (trim.model_fuel_type) {
-          const ft = trim.model_fuel_type.toLowerCase();
-          if (ft.includes("diesel")) fuelType = "Dizel";
-          else if (ft.includes("hybrid")) fuelType = "Hibrit";
-          else if (ft.includes("electric")) fuelType = "Elektrik";
-        }
-      }
+    if (!res.ok) throw new Error("getTrims (years) failed");
+    const data = parseCarQuery(await res.text()) as { Trims?: CarQueryTrim[] };
+    if (data.Trims?.length) {
+      const years = [
+        ...new Set(
+          data.Trims.map((t) => parseInt(t.model_year)).filter((y) => !isNaN(y))
+        ),
+      ].sort((a, b) => b - a);
+      return years;
     }
   } catch (err) {
-    console.warn("Canlı trim özellikleri çekilemedi, akıllı varsayılanlar hesaplandı:", err);
+    console.warn("Yıllar çekilemedi:", err);
   }
+  return [];
+}
 
-  // Model adına göre akıllı dinamik fiyat ve tüketim tahmini (eğer API boş döndüyse)
-  const fullText = `${make} ${model}`.toLowerCase();
-  if (fullText.includes("electric") || fullText.includes("ev") || fullText.includes("tesla") || fullText.includes("taycan") || fullText.includes("ioniq")) {
-    fuelType = "Elektrik";
-    avgFuelConsumption = 0;
-    if (weightKg === 1350) weightKg = 1850;
-    if (priceGBP === 22000) priceGBP = 38000;
-  } else if (fullText.includes("hybrid") || fullText.includes("e:hev") || fullText.includes("etSI") || fullText.includes("phev")) {
-    fuelType = "Hibrit";
-    avgFuelConsumption = 4.8;
-    if (priceGBP === 22000) priceGBP = 28000;
-  } else if (fullText.includes("d-4d") || fullText.includes("tdi") || fullText.includes("dizel") || fullText.includes("diesel") || fullText.includes("cdti")) {
-    fuelType = "Dizel";
-    avgFuelConsumption = 5.8;
+export interface EngineOption {
+  cc: number;
+  fuelType: "Benzin" | "Dizel" | "Hibrit" | "Elektrik";
+  trim: string;
+  weightKg: number;
+  fuelConsumption: number;
+  label: string;
+}
+
+/** Yıl seçilince motor hacmi seçeneklerini çek */
+export async function fetchEnginesOnline(
+  make: string,
+  model: string,
+  year: number
+): Promise<EngineOption[]> {
+  try {
+    const res = await fetch(
+      `https://www.carqueryapi.com/api/0.3/?cmd=getTrims&make=${encodeURIComponent(
+        make.toLowerCase()
+      )}&model=${encodeURIComponent(model.toLowerCase())}&year=${year}`
+    );
+    if (!res.ok) throw new Error("getTrims (engines) failed");
+    const data = parseCarQuery(await res.text()) as { Trims?: CarQueryTrim[] };
+    if (data.Trims?.length) {
+      const seen = new Set<string>();
+      const engines: EngineOption[] = [];
+      for (const t of data.Trims) {
+        const cc = parseInt(t.model_engine_cc ?? "0") || 0;
+        const ft = normalizeFuelType(t.model_fuel_type ?? "");
+        const key = `${cc}-${ft}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const weight = parseFloat(t.model_weight_kg ?? "0") || 1350;
+        const consumption = parseFloat(t.model_lkm_mixed ?? "0") || (ft === "Elektrik" ? 0 : 7.0);
+        const ccLabel = cc > 0 ? `${cc} cc` : "Bilinmiyor";
+        engines.push({
+          cc,
+          fuelType: ft,
+          trim: t.model_trim || "",
+          weightKg: Math.round(weight),
+          fuelConsumption: Number(consumption.toFixed(1)),
+          label: `${ccLabel} – ${ft}${t.model_trim ? ` (${t.model_trim})` : ""}`,
+        });
+      }
+      // Sort by cc desc
+      return engines.sort((a, b) => b.cc - a.cc);
+    }
+  } catch (err) {
+    console.warn("Motor seçenekleri çekilemedi:", err);
   }
+  return [];
+}
 
-  // Lüks segment ve SUV dinamik fiyat ayarlamaları
-  if (fullText.includes("porsche") || fullText.includes("ferrari") || fullText.includes("lamborghini") || fullText.includes("aston martin") || fullText.includes("bentley")) {
-    priceGBP = 85000;
-    weightKg = 1750;
-  } else if (fullText.includes("bmw") || fullText.includes("mercedes") || fullText.includes("audi") || fullText.includes("lexus") || fullText.includes("land rover")) {
-    priceGBP = 42000;
-    weightKg = 1600;
-  }
+function normalizeFuelType(
+  raw: string
+): "Benzin" | "Dizel" | "Hibrit" | "Elektrik" {
+  const l = raw.toLowerCase();
+  if (l.includes("electric")) return "Elektrik";
+  if (l.includes("hybrid")) return "Hibrit";
+  if (l.includes("diesel")) return "Dizel";
+  return "Benzin";
+}
 
+/**
+ * Seçimler tamamlanınca Car nesnesini oluştur.
+ * Veriler CarQuery'den gelir; eksikse akıllı tahminler kullanılır.
+ */
+export function buildCar(
+  make: string,
+  model: string,
+  year: number,
+  engine: EngineOption
+): Car {
   return {
-    id: carId,
+    id: `online-${make}-${model}-${year}-${engine.cc}-${Date.now()}`,
     brand: make,
-    model: model,
-    year: year,
-    weightKg: weightKg,
-    priceGBP: priceGBP,
-    avgFuelConsumption: avgFuelConsumption,
-    fuelType: fuelType,
-    engineCC: engineCC,
+    model,
+    year,
+    weightKg: engine.weightKg,
+    priceGBP: estimatePriceGBP(make, model, year, engine.cc, engine.fuelType),
+    avgFuelConsumption: engine.fuelConsumption,
+    fuelType: engine.fuelType,
+    engineCC: engine.cc,
   };
+}
+
+function estimatePriceGBP(
+  make: string,
+  model: string,
+  year: number,
+  cc: number,
+  fuelType: string
+): number {
+  const full = `${make} ${model}`.toLowerCase();
+  const age = new Date().getFullYear() - year;
+  let base = 18000;
+
+  if (["tesla", "porsche", "ferrari", "lamborghini", "bentley", "aston martin"].some((b) => full.includes(b))) {
+    base = fuelType === "Elektrik" ? 60000 : 85000;
+  } else if (["bmw", "mercedes", "audi", "lexus", "land rover", "volvo", "jaguar"].some((b) => full.includes(b))) {
+    base = 40000;
+  } else if (cc > 2000) {
+    base = 30000;
+  } else if (cc > 1600) {
+    base = 23000;
+  }
+
+  if (fuelType === "Elektrik") base = Math.max(base, 32000);
+  else if (fuelType === "Hibrit") base = Math.max(base, 22000);
+
+  // Yaş ile değer kaybı (~%8/yıl)
+  const depreciation = Math.pow(0.92, age);
+  return Math.round(base * depreciation);
+}
+
+/** Eski API uyumluluğu için */
+export async function fetchVehicleSpecsOnline(
+  make: string,
+  model: string,
+  year: number = new Date().getFullYear()
+): Promise<Car> {
+  const engines = await fetchEnginesOnline(make, model, year);
+  const engine = engines[0] ?? {
+    cc: 1400,
+    fuelType: "Benzin" as const,
+    trim: "",
+    weightKg: 1350,
+    fuelConsumption: 7.0,
+    label: "1400 cc – Benzin",
+  };
+  return buildCar(make, model, year, engine);
 }

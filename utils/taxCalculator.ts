@@ -56,19 +56,44 @@ export const FALLBACK_GBP_RATE = 45;
  * Araç ağırlığına göre KKTC yıllık seyrüsefer vergisini hesaplar.
  * Seyrüsefer vergisi her zaman TL cinsindendir.
  * @param weightKg Araçın boş ağırlığı (kg)
+ * @param year     Araç üretim yılı (10 yıl üzeri %30 indirim)
+ * @param fuelType Yakıt türü (Elektrik için genişletilmiş baremler)
  */
-export function calculateRoadTax(weightKg: number): TaxResult {
-  const baremEntry =
-    BAREMS.find((b) => weightKg <= b.maxKg) ?? BAREMS[BAREMS.length - 1];
+export function calculateRoadTax(
+  weightKg: number,
+  year?: number,
+  fuelType?: string
+): TaxResult {
+  // Elektrikli araçlar için genişletilmiş baremler (batarya ağırlığı nedeniyle)
+  let effectiveBarems = BAREMS;
+  if (fuelType === "Elektrik") {
+    effectiveBarems = [
+      { barem: 1 as const, label: "Barem 1", range: "0 – 1.366 kg",        maxKg: 1366,    ratePerKg: 2.5, color: "green"  },
+      { barem: 2 as const, label: "Barem 2", range: "1.367 – 1.670 kg",    maxKg: 1670,    ratePerKg: 4.0, color: "yellow" },
+      { barem: 3 as const, label: "Barem 3", range: "1.671 – 1.950 kg",    maxKg: 1950,    ratePerKg: 5.0, color: "orange" },
+      { barem: 4 as const, label: "Barem 4", range: "1.951 kg ve üzeri",   maxKg: Infinity, ratePerKg: 7.0, color: "red"    },
+    ];
+  }
 
-  const annualTax = weightKg * baremEntry.ratePerKg + BASE_EMISSION_FEE;
+  const baremEntry =
+    effectiveBarems.find((b) => weightKg <= b.maxKg) ?? effectiveBarems[effectiveBarems.length - 1];
+
+  const baseTax = weightKg * baremEntry.ratePerKg + BASE_EMISSION_FEE;
+
+  // Yaş indirimi: 10 yıldan eski araçlara %30 indirim
+  const currentYear = new Date().getFullYear();
+  const age = year ? currentYear - year : 0;
+  const ageDiscountPct = age > 10 ? 0.30 : 0;
+  const annualTax = Math.round(baseTax * (1 - ageDiscountPct));
 
   return {
     barem: baremEntry.barem,
     baremLabel: baremEntry.label,
     baremRange: baremEntry.range,
-    annualTax: Math.round(annualTax),
+    annualTax,
     ratePerKg: baremEntry.ratePerKg,
+    ageDiscountApplied: ageDiscountPct > 0,
+    ageDiscountPct: ageDiscountPct * 100,
   };
 }
 

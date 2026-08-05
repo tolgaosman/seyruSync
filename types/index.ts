@@ -16,6 +16,8 @@ export interface TaxResult {
   baremRange: string;
   annualTax: number; // TL
   ratePerKg: number;
+  ageDiscountApplied?: boolean;
+  ageDiscountPct?: number;
 }
 
 export interface InsuranceEstimate {
