@@ -41,7 +41,7 @@ export const POPULAR_MAKES = [
 const FALLBACK_MODELS: Record<string, string[]> = {
   "Toyota":         ["Corolla", "Camry", "RAV4", "Yaris", "C-HR", "Land Cruiser", "Prius", "Hilux", "Auris", "Avensis"],
   "Volkswagen":     ["Golf", "Polo", "Passat", "Tiguan", "T-Roc", "Touareg", "Arteon", "ID.3", "ID.4", "Caddy"],
-  "BMW":            ["1 Series", "2 Series", "3 Series", "5 Series", "7 Series", "X1", "X3", "X5", "X6", "iX"],
+  "BMW":            ["1 Series", "2 Series", "3 Series", "4 Series", "5 Series", "7 Series", "8 Series", "X1", "X3", "X5", "X6", "iX"],
   "Mercedes-Benz":  ["A-Class", "B-Class", "C-Class", "E-Class", "S-Class", "GLA", "GLC", "GLE", "EQA", "EQC"],
   "Honda":          ["Civic", "CR-V", "HR-V", "Jazz", "Accord", "e:Ny1", "ZR-V"],
   "Ford":           ["Fiesta", "Focus", "Kuga", "Puma", "Mustang Mach-E", "Explorer", "EcoSport", "Mondeo", "Transit"],
