@@ -5,6 +5,7 @@ import {
   calculateRoadTax,
   formatTL,
   formatGBP,
+  getBaremColors,
 } from "@/utils/taxCalculator";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,74 +28,63 @@ export function ComparisonTable({ cars, gbpRate, fuelPriceTL }: ComparisonTableP
   if (cars.length === 0) return null;
 
   return (
-    <div className="rounded-3xl border border-[#e5e2d8] overflow-hidden bg-white shadow-sm">
+    <div className="rounded-xl border border-slate-200 overflow-hidden bg-white">
       <Table>
         <TableHeader>
-          <TableRow className="bg-[#f0eee6]/60 border-b border-[#e5e2d8]">
-            <TableHead className="w-52">Araç & Model</TableHead>
+          <TableRow className="bg-slate-50">
+            <TableHead className="w-48">Araç</TableHead>
             <TableHead>
               <span className="flex items-center gap-1">
-                <PoundSterling className="h-3.5 w-3.5 text-[#063b28]" /> Fiyat (GBP)
+                <PoundSterling className="h-3.5 w-3.5" /> Fiyat (GBP)
               </span>
             </TableHead>
             <TableHead>TL Karşılığı</TableHead>
             <TableHead>
               <span className="flex items-center gap-1">
-                <Scale className="h-3.5 w-3.5 text-[#063b28]" /> Ağırlık
+                <Scale className="h-3.5 w-3.5" /> Ağırlık
               </span>
             </TableHead>
             <TableHead>Barem</TableHead>
             <TableHead>
               <span className="flex items-center gap-1">
-                <ShieldCheck className="h-3.5 w-3.5 text-[#063b28]" /> Yıllık Vergi
+                <ShieldCheck className="h-3.5 w-3.5" /> Yıllık Vergi (TL)
               </span>
             </TableHead>
             <TableHead>
               <span className="flex items-center gap-1">
-                <Fuel className="h-3.5 w-3.5 text-[#063b28]" /> Tüketim
+                <Fuel className="h-3.5 w-3.5" /> Tüketim
               </span>
             </TableHead>
-            <TableHead>Değerlendirme</TableHead>
+            <TableHead>Yakıt</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {cars.map((car) => {
             const tax = calculateRoadTax(car.weightKg);
+            const colors = getBaremColors(tax.barem);
             const priceTL = Math.round(car.priceGBP * gbpRate);
             const annualFuelCostTL =
               car.fuelType === "Elektrik"
                 ? null
                 : Math.round((car.avgFuelConsumption / 100) * 15_000 * fuelPriceTL);
 
-            // Barem rating status
-            let ratingBadge = <Badge variant="optimal">Optimal</Badge>;
-            if (tax.barem === 1) {
-              ratingBadge = <Badge variant="optimal">En Düşük Barem</Badge>;
-            } else if (tax.barem === 4) {
-              ratingBadge = <Badge variant="barem4">Yüksek Barem</Badge>;
-            } else if (car.fuelType === "Elektrik") {
-              ratingBadge = <Badge variant="sand">Sıfır Emisyon</Badge>;
-            }
-
             return (
-              <TableRow key={car.id} className="hover:bg-[#f6f5f0]/80 transition-colors">
+              <TableRow key={car.id}>
                 <TableCell>
                   <div>
-                    <p className="font-serif font-bold text-[#111814] text-base">
+                    <p className="font-semibold text-slate-800 text-sm">
                       {car.brand} {car.model}
                     </p>
-                    <p className="text-xs text-[#68706b]">
-                      {car.year} • {car.fuelType}
-                    </p>
+                    <p className="text-xs text-slate-400">{car.year}</p>
                   </div>
                 </TableCell>
-                <TableCell className="font-serif font-bold text-[#063b28] text-base">
+                <TableCell className="font-semibold text-blue-700">
                   {formatGBP(car.priceGBP)}
                 </TableCell>
-                <TableCell className="text-[#68706b] text-sm">
+                <TableCell className="text-slate-600 text-sm">
                   {formatTL(priceTL)}
                 </TableCell>
-                <TableCell className="text-[#111814] font-medium">
+                <TableCell className="text-slate-700">
                   {car.weightKg.toLocaleString("tr-TR")} kg
                 </TableCell>
                 <TableCell>
@@ -111,25 +101,39 @@ export function ComparisonTable({ cars, gbpRate, fuelPriceTL }: ComparisonTableP
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <span className="font-serif font-bold text-[#111814] text-base">
+                  <span className={`font-bold ${colors.text}`}>
                     {formatTL(tax.annualTax)}
                   </span>
                 </TableCell>
-                <TableCell className="text-[#111814]">
+                <TableCell className="text-slate-700">
                   {car.fuelType === "Elektrik" ? (
-                    <span className="text-[#68706b] text-xs">Elektrikli</span>
+                    <span className="text-slate-400 text-xs">Elektrik</span>
                   ) : (
-                    <div>
-                      <span className="font-medium">{car.avgFuelConsumption} L/100km</span>
+                    <span>
+                      {car.avgFuelConsumption} L/100km
                       {annualFuelCostTL && (
-                        <span className="block text-[11px] text-[#68706b]">
+                        <span className="block text-xs text-slate-400">
                           ≈ {formatTL(annualFuelCostTL)}/yıl
                         </span>
                       )}
-                    </div>
+                    </span>
                   )}
                 </TableCell>
-                <TableCell>{ratingBadge}</TableCell>
+                <TableCell>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      car.fuelType === "Elektrik"
+                        ? "bg-teal-100 text-teal-700"
+                        : car.fuelType === "Hibrit"
+                        ? "bg-blue-100 text-blue-700"
+                        : car.fuelType === "Dizel"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {car.fuelType}
+                  </span>
+                </TableCell>
               </TableRow>
             );
           })}

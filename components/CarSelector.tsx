@@ -47,21 +47,16 @@ export function CarSelector({
 
         return (
           <div key={idx} className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-[#68706b] uppercase tracking-wider">
-                Araç Slot {idx + 1}
-              </label>
-              {selected && (
-                <span className="text-xs text-[#063b28] font-medium">Seçildi</span>
-              )}
-            </div>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              Araç {idx + 1}
+            </label>
             <div className="flex items-center gap-2">
               <Select
                 value={selected?.id ?? "__none__"}
                 onValueChange={(val) => handleSelect(val, idx)}
               >
                 <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Veritabanından araç seçin…" />
+                  <SelectValue placeholder="Araç seçin…" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">— Seçilmedi —</SelectItem>
@@ -72,7 +67,7 @@ export function CarSelector({
                         <SelectLabel>{brand}</SelectLabel>
                         {brandCars.map((car) => (
                           <SelectItem key={car.id} value={car.id}>
-                            {car.year} {car.brand} {car.model} ({car.weightKg} kg)
+                            {car.year} {car.brand} {car.model}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -85,7 +80,7 @@ export function CarSelector({
                   variant="ghost"
                   size="icon"
                   onClick={() => onSelect(null, idx)}
-                  className="text-[#68706b] hover:text-[#b84a32] shrink-0"
+                  className="text-slate-400 hover:text-red-500 shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -94,30 +89,29 @@ export function CarSelector({
 
             {selected && tax && colors && (
               <div
-                className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border border-[#e5e2d8] bg-[#f0eee6] text-xs"
+                className={`flex flex-wrap items-center gap-2 p-3 rounded-lg border ${colors.border} ${colors.bg} text-sm`}
               >
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant={
-                      `barem${tax.barem}` as
-                        | "barem1"
-                        | "barem2"
-                        | "barem3"
-                        | "barem4"
-                    }
-                  >
-                    {tax.baremLabel}
-                  </Badge>
-                  <span className="font-semibold text-[#111814]">
-                    {selected.weightKg} kg
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="font-bold text-[#063b28] font-serif text-sm">
-                    {tax.annualTax.toLocaleString("tr-TR")} ₺
-                  </span>
-                  <span className="text-[#68706b] text-[11px]">/yıl</span>
-                </div>
+                <Badge
+                  variant={
+                    `barem${tax.barem}` as
+                      | "barem1"
+                      | "barem2"
+                      | "barem3"
+                      | "barem4"
+                  }
+                >
+                  {tax.baremLabel}
+                </Badge>
+                <span className={`font-medium ${colors.text}`}>
+                  {selected.weightKg} kg
+                </span>
+                <span className="text-slate-400">·</span>
+                <span className={`font-semibold ${colors.text}`}>
+                  {tax.annualTax.toLocaleString("tr-TR")} TL/yıl
+                </span>
+                <span className="text-slate-400 text-xs">
+                  ({tax.baremRange})
+                </span>
               </div>
             )}
           </div>
@@ -125,9 +119,9 @@ export function CarSelector({
       })}
 
       {selectedCars.filter(Boolean).length === 0 && (
-        <p className="text-xs text-[#68706b] flex items-center gap-1.5 pt-1">
-          <PlusCircle className="h-3.5 w-3.5 text-[#063b28]" />
-          Karşılaştırmak istediğiniz araçları yukarıdaki menülerden belirleyin.
+        <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
+          <PlusCircle className="h-3.5 w-3.5" />
+          En fazla {maxSlots} araç seçip karşılaştırabilirsiniz.
         </p>
       )}
     </div>

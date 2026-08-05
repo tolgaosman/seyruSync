@@ -5,6 +5,7 @@ import {
   calculateTCO,
   formatTL,
   formatGBP,
+  getBaremColors,
   calculateRoadTax,
 } from "@/utils/taxCalculator";
 import {
@@ -17,7 +18,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Sparkles } from "lucide-react";
 
 interface TCOChartProps {
   cars: Car[];
@@ -27,9 +27,9 @@ interface TCOChartProps {
 }
 
 const SEGMENT_COLORS = {
-  vehiclePriceTL: "#063b28", // Forest Green
-  fiveYearTax: "#b84a32",    // Terracotta
-  fiveYearFuel: "#8ca797",   // Sage Green
+  vehiclePriceTL: "#3b82f6",
+  fiveYearTax: "#f97316",
+  fiveYearFuel: "#10b981",
 };
 
 interface CustomTooltipProps {
@@ -42,32 +42,32 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload) return null;
   const total = payload.reduce((sum, p) => sum + (p.value || 0), 0);
   return (
-    <div className="bg-white border border-[#e5e2d8] rounded-2xl shadow-xl p-4 min-w-56">
-      <p className="font-serif font-bold text-[#111814] text-base mb-3">{label}</p>
+    <div className="bg-white border border-slate-200 rounded-xl shadow-lg p-4 min-w-52">
+      <p className="font-bold text-slate-800 text-sm mb-3">{label}</p>
       {payload.map((entry) => (
         <div
           key={entry.name}
-          className="flex items-center justify-between gap-4 mb-2"
+          className="flex items-center justify-between gap-4 mb-1.5"
         >
-          <span className="flex items-center gap-2 text-xs text-[#68706b]">
+          <span className="flex items-center gap-1.5 text-xs text-slate-600">
             <span
-              className="h-2.5 w-2.5 rounded-full shrink-0"
+              className="h-2.5 w-2.5 rounded-sm shrink-0"
               style={{ backgroundColor: entry.fill }}
             />
             {entry.name === "vehiclePriceTL"
               ? "Araç Fiyatı (TL)"
               : entry.name === "fiveYearTax"
-              ? "5 Yıl Seyrüsefer Vergisi"
-              : "5 Yıl Yakıt Gideri"}
+              ? "5 Yıl Vergi"
+              : "5 Yıl Yakıt"}
           </span>
-          <span className="font-semibold text-[#111814] text-xs">
+          <span className="font-semibold text-slate-800 text-xs">
             {formatTL(entry.value)}
           </span>
         </div>
       ))}
-      <div className="border-t border-[#e5e2d8] mt-3 pt-2.5 flex justify-between items-center">
-        <span className="text-xs font-bold text-[#68706b]">Toplam 5 Yıllık TCO</span>
-        <span className="font-serif font-bold text-[#063b28] text-base">
+      <div className="border-t border-slate-200 mt-2 pt-2 flex justify-between">
+        <span className="text-xs font-bold text-slate-700">Toplam TCO</span>
+        <span className="text-xs font-bold text-blue-700">
           {formatTL(total)}
         </span>
       </div>
@@ -81,6 +81,7 @@ export function TCOChart({ cars, gbpRate, fuelPriceTL, annualKm }: TCOChartProps
   const data = cars.map((car) => {
     const tco = calculateTCO(car, gbpRate, fuelPriceTL, annualKm, 5);
     const tax = calculateRoadTax(car.weightKg);
+    const colors = getBaremColors(tax.barem);
     return {
       name: `${car.brand} ${car.model}`.substring(0, 22),
       fullName: `${car.year} ${car.brand} ${car.model}`,
@@ -89,37 +90,15 @@ export function TCOChart({ cars, gbpRate, fuelPriceTL, annualKm }: TCOChartProps
       fiveYearTax: tco.fiveYearTax,
       fiveYearFuel: tco.fiveYearFuel,
       total: tco.total,
+      baremColor: colors.fill,
     };
   });
-
-  // Find lowest TCO car for insight tag
-  const lowestTCOCar = [...data].sort((a, b) => a.total - b.total)[0];
 
   const maxVal = Math.max(...data.map((d) => d.total));
   const yAxisMax = Math.ceil(maxVal / 500_000) * 500_000;
 
   return (
-    <div className="space-y-6">
-      {/* Top Insight Badge Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#f0eee6] border border-[#e5e2d8]">
-        <div>
-          <h4 className="font-serif font-bold text-[#063b28] text-lg">
-            5 Yıllık TCO Projeksiyon Analizi
-          </h4>
-          <p className="text-xs text-[#68706b] mt-0.5">
-            {annualKm.toLocaleString("tr-TR")} km/yıl ve {fuelPriceTL} TL/L yakıt fiyatı baz alınmıştır.
-          </p>
-        </div>
-        {lowestTCOCar && (
-          <div className="flex items-center gap-2 bg-white/90 border border-[#e5e2d8] px-3.5 py-2 rounded-xl text-xs shrink-0">
-            <Sparkles className="h-4 w-4 text-[#063b28]" />
-            <span>
-              En Uygun TCO: <strong className="text-[#063b28] font-bold">{lowestTCOCar.name}</strong>
-            </span>
-          </div>
-        )}
-      </div>
-
+    <div className="space-y-4">
       <ResponsiveContainer width="100%" height={340}>
         <BarChart
           data={data}
@@ -128,12 +107,12 @@ export function TCOChart({ cars, gbpRate, fuelPriceTL, annualKm }: TCOChartProps
         >
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="#e5e2d8"
+            stroke="#f1f5f9"
             vertical={false}
           />
           <XAxis
             dataKey="name"
-            tick={{ fontSize: 12, fill: "#111814", fontFamily: "Playfair Display", fontWeight: 700 }}
+            tick={{ fontSize: 12, fill: "#64748b" }}
             axisLine={false}
             tickLine={false}
           />
@@ -145,13 +124,13 @@ export function TCOChart({ cars, gbpRate, fuelPriceTL, annualKm }: TCOChartProps
                 ? `${(v / 1_000).toFixed(0)}K ₺`
                 : String(v)
             }
-            tick={{ fontSize: 11, fill: "#68706b" }}
+            tick={{ fontSize: 11, fill: "#94a3b8" }}
             axisLine={false}
             tickLine={false}
             domain={[0, yAxisMax]}
             width={65}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f0eee6" }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f8fafc" }} />
           <Legend
             formatter={(value) =>
               value === "vehiclePriceTL"
@@ -160,7 +139,7 @@ export function TCOChart({ cars, gbpRate, fuelPriceTL, annualKm }: TCOChartProps
                 ? "5 Yıl Seyrüsefer Vergisi"
                 : "5 Yıl Yakıt Gideri"
             }
-            wrapperStyle={{ fontSize: 12, color: "#68706b", paddingTop: "12px" }}
+            wrapperStyle={{ fontSize: 12, color: "#64748b" }}
           />
           <Bar
             dataKey="vehiclePriceTL"
@@ -178,13 +157,13 @@ export function TCOChart({ cars, gbpRate, fuelPriceTL, annualKm }: TCOChartProps
             dataKey="fiveYearFuel"
             stackId="tco"
             fill={SEGMENT_COLORS.fiveYearFuel}
-            radius={[8, 8, 0, 0]}
+            radius={[6, 6, 0, 0]}
             name="fiveYearFuel"
           />
         </BarChart>
       </ResponsiveContainer>
 
-      {/* TCO Breakdown Cards */}
+      {/* TCO Summary Cards */}
       <div
         className={`grid gap-3 ${
           cars.length === 1
@@ -197,24 +176,24 @@ export function TCOChart({ cars, gbpRate, fuelPriceTL, annualKm }: TCOChartProps
         {data.map((d) => (
           <div
             key={d.fullName}
-            className="rounded-2xl border border-[#e5e2d8] bg-[#f0eee6]/50 p-4 space-y-2"
+            className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4"
           >
-            <p className="font-serif font-bold text-[#111814] text-base truncate">
+            <p className="text-xs font-semibold text-slate-500 truncate mb-1">
               {d.fullName}
             </p>
-            <p className="text-xs text-[#063b28] font-semibold">
+            <p className="text-xs text-blue-600 font-medium mb-2">
               {d.gbpLabel} sterlin
             </p>
-            <p className="font-serif text-2xl font-bold text-[#111814]">
+            <p className="text-xl font-bold text-slate-800">
               {formatTL(d.total)}
             </p>
-            <p className="text-[11px] text-[#68706b]">
-              5 yıllık toplam maliyet
+            <p className="text-xs text-slate-400 mt-0.5 mb-3">
+              5 yıllık toplam (TL)
             </p>
-            <div className="space-y-2 pt-1">
+            <div className="space-y-1.5">
               {[
                 {
-                  label: "Araç Fiyatı",
+                  label: "Araç",
                   val: d.vehiclePriceTL,
                   color: SEGMENT_COLORS.vehiclePriceTL,
                 },
@@ -231,21 +210,21 @@ export function TCOChart({ cars, gbpRate, fuelPriceTL, annualKm }: TCOChartProps
               ].map(({ label, val, color }) => (
                 <div key={label} className="flex items-center gap-2">
                   <span
-                    className="h-2 w-2 rounded-full shrink-0"
+                    className="h-2 w-2 rounded-sm shrink-0"
                     style={{ backgroundColor: color }}
                   />
-                  <span className="text-xs text-[#68706b] w-16">{label}</span>
-                  <div className="flex-1 h-2 bg-white rounded-full overflow-hidden border border-[#e5e2d8]">
+                  <span className="text-xs text-slate-500 w-12">{label}</span>
+                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all duration-500"
+                      className="h-full rounded-full"
                       style={{
                         width: `${(val / d.total) * 100}%`,
                         backgroundColor: color,
                       }}
                     />
                   </div>
-                  <span className="text-xs font-semibold text-[#111814] w-12 text-right">
-                    %{((val / d.total) * 100).toFixed(0)}
+                  <span className="text-xs font-medium text-slate-600 w-14 text-right">
+                    {((val / d.total) * 100).toFixed(0)}%
                   </span>
                 </div>
               ))}

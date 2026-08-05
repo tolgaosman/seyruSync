@@ -11,14 +11,9 @@ import { BaremReference } from "@/components/BaremReference";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   DEFAULT_FUEL_PRICE_TL,
   DEFAULT_ANNUAL_KM,
-  calculateRoadTax,
-  calculateTCO,
-  formatTL,
-  formatGBP,
 } from "@/utils/taxCalculator";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
 import {
@@ -35,17 +30,10 @@ import {
   RefreshCw,
   AlertTriangle,
   Wifi,
-  LayoutGrid,
-  SlidersHorizontal,
-  Plus,
-  HelpCircle,
-  Settings,
-  Sparkles,
 } from "lucide-react";
 
 const MAX_CARS = 3;
 type LeftTab = "database" | "custom";
-type NavItem = "dashboard" | "database" | "custom" | "barem";
 
 export default function Home() {
   const [selectedCars, setSelectedCars] = useState<(Car | null)[]>([
@@ -57,17 +45,9 @@ export default function Home() {
   const [fuelPriceTL, setFuelPriceTL] = useState<number>(DEFAULT_FUEL_PRICE_TL);
   const [annualKm, setAnnualKm] = useState<number>(DEFAULT_ANNUAL_KM);
   const [leftTab, setLeftTab] = useState<LeftTab>("database");
-  const [activeNav, setActiveNav] = useState<NavItem>("dashboard");
 
   // Canlı GBP → TL kuru
-  const {
-    rate: gbpRate,
-    source: rateSource,
-    fetchedAt,
-    isLoading: rateLoading,
-    error: rateError,
-    refresh: refreshRate,
-  } = useExchangeRate();
+  const { rate: gbpRate, source: rateSource, fetchedAt, isLoading: rateLoading, error: rateError, refresh: refreshRate } = useExchangeRate();
 
   // Seçilen tüm araçlar (DB + özel)
   const allCars: Car[] = [
@@ -100,21 +80,9 @@ export default function Home() {
 
   const canAddMore = allCars.length < MAX_CARS;
 
-  // Toplam hesaplamalar (Stat bar için)
-  const totalAnnualTax = allCars.reduce(
-    (sum, c) => sum + calculateRoadTax(c.weightKg).annualTax,
-    0
-  );
-  const totalTCO = allCars.reduce(
-    (sum, c) =>
-      sum +
-      calculateTCO(c, gbpRate, fuelPriceTL, annualKm, 5).total,
-    0
-  );
-
   // Kur gösterim metni
   const rateDisplay = rateLoading
-    ? "Kur çekiliyor…"
+    ? "Kur yükleniyor…"
     : `1 £ = ${gbpRate.toFixed(2)} ₺`;
 
   const fetchedDate = fetchedAt
@@ -125,244 +93,160 @@ export default function Home() {
     : null;
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#f6f5f0] text-[#111814]">
-      {/* ══════════════════════════════════════════════════
-          DESKTOP SIDEBAR (CurbWeight Style)
-      ══════════════════════════════════════════════════ */}
-      <aside className="hidden lg:flex w-72 flex-col justify-between p-6 bg-[#f6f5f0] border-r border-[#e5e2d8] sticky top-0 h-screen shrink-0">
-        <div className="space-y-8">
-          {/* Logo & Subtitle */}
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="font-serif text-3xl font-extrabold tracking-tight text-[#063b28]">
-                AutoBarem
-              </h1>
-              <Badge variant="sand" className="text-[10px] px-2 py-0.5 font-bold">
-                KKTC
-              </Badge>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
+      {/* ─── HEADER ─── */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+          {/* Logo */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="bg-blue-600 text-white p-2 rounded-xl shadow-sm">
+              <CarIcon className="h-6 w-6" />
             </div>
-            <p className="text-xs text-[#68706b] font-medium tracking-wide mt-1">
-              Seyrüsefer & TCO Intelligence
-            </p>
+            <div>
+              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                AutoBarem
+                <span className="ml-2 text-blue-600">KKTC</span>
+              </h1>
+              <p className="text-xs text-slate-400 leading-none">
+                Seyrüsefer Vergisi & TCO Karşılaştırıcı
+              </p>
+            </div>
           </div>
 
-          {/* Primary Action Button */}
-          <Button
-            className="w-full justify-start gap-2.5 bg-[#063b28] hover:bg-[#0a4d35] text-white rounded-2xl py-3 px-4 shadow-sm"
-            onClick={() => {
-              setLeftTab("custom");
-              setActiveNav("custom");
-            }}
-          >
-            <Plus className="h-4 w-4" />
-            <span className="font-semibold text-sm">Araç Ekle</span>
-          </Button>
-
-          {/* Navigation Links */}
-          <nav className="space-y-1.5">
-            {[
-              { id: "dashboard", label: "Dashboard", icon: LayoutGrid },
-              { id: "database", label: "Araç Veritabanı", icon: BookOpen },
-              { id: "custom", label: "Özel Araç Gir", icon: PenLine },
-              { id: "barem", label: "Barem Tablosu", icon: TableIcon },
-            ].map((item) => {
-              const Icon = item.icon;
-              const isActive = activeNav === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveNav(item.id as NavItem);
-                    if (item.id === "database" || item.id === "custom") {
-                      setLeftTab(item.id as LeftTab);
-                    }
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
-                    isActive
-                      ? "bg-[#063b28] text-white shadow-sm"
-                      : "text-[#555d57] hover:bg-[#f0eee6] hover:text-[#111814]"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Footer Widgets (Exchange rate & Help) */}
-        <div className="space-y-4 pt-6 border-t border-[#e5e2d8]">
-          <div className="p-3.5 rounded-2xl bg-[#f0eee6] border border-[#e5e2d8] space-y-1.5">
-            <div className="flex items-center justify-between text-xs text-[#68706b]">
-              <span className="font-bold uppercase tracking-wider text-[10px]">
-                Sterlin Kuru
-              </span>
-              <div className="flex items-center gap-1">
-                {rateSource === "live" ? (
-                  <Wifi className="h-3 w-3 text-[#063b28]" />
-                ) : (
-                  <AlertTriangle className="h-3 w-3 text-[#b84a32]" />
-                )}
-                <span className="text-[10px]">
-                  {rateSource === "live" ? "Canlı" : "Yedek"}
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="font-serif font-bold text-lg text-[#063b28]">
+          {/* Canlı Kur Göstergesi */}
+          <div className="hidden md:flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2">
+            <div className="flex items-center gap-1.5">
+              <PoundSterling className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-bold text-blue-800">
                 {rateDisplay}
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-[#68706b] hover:text-[#063b28]"
-                onClick={refreshRate}
-                title="Kuru Yenile"
-              >
-                <RefreshCw className="h-3.5 w-3.5" />
-              </Button>
+            </div>
+            <div className="h-4 w-px bg-blue-200" />
+            <div className="flex items-center gap-1">
+              {rateSource === "live" ? (
+                <Wifi className="h-3.5 w-3.5 text-emerald-500" />
+              ) : rateSource === "fallback" ? (
+                <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+              ) : (
+                <RefreshCw className="h-3.5 w-3.5 text-slate-400 animate-spin" />
+              )}
+              <span className="text-xs text-slate-500">
+                {rateSource === "live"
+                  ? `Canlı · ${fetchedDate ?? ""}`
+                  : rateSource === "fallback"
+                  ? "Yedek kur"
+                  : "Yükleniyor"}
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-blue-400 hover:text-blue-600"
+              onClick={refreshRate}
+              title="Kuru yenile"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
+          {/* TCO Parametreleri (masaüstü) */}
+          <div className="hidden lg:flex items-center gap-4 text-sm text-slate-500">
+            <div className="flex items-center gap-1.5">
+              <Fuel className="h-4 w-4 text-slate-400" />
+              <span className="text-xs">Yakıt:</span>
+              <div className="flex items-center border border-slate-300 rounded-lg overflow-hidden">
+                <Input
+                  type="number"
+                  className="border-0 h-7 w-16 text-sm shadow-none focus-visible:ring-0 text-slate-700 font-medium"
+                  value={fuelPriceTL}
+                  onChange={(e) => setFuelPriceTL(Number(e.target.value))}
+                  min={1}
+                />
+                <span className="text-xs text-slate-400 pr-2">TL/L</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Route className="h-4 w-4 text-slate-400" />
+              <span className="text-xs">Yıllık:</span>
+              <div className="flex items-center border border-slate-300 rounded-lg overflow-hidden">
+                <Input
+                  type="number"
+                  className="border-0 h-7 w-20 text-sm shadow-none focus-visible:ring-0 text-slate-700 font-medium"
+                  value={annualKm}
+                  onChange={(e) => setAnnualKm(Number(e.target.value))}
+                  step={1000}
+                  min={1000}
+                />
+                <span className="text-xs text-slate-400 pr-2">km</span>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between px-2 text-xs text-[#68706b]">
-            <span className="flex items-center gap-1.5 hover:text-[#111814] cursor-pointer">
-              <HelpCircle className="h-3.5 w-3.5" /> Destek
-            </span>
-            <span className="flex items-center gap-1.5 hover:text-[#111814] cursor-pointer">
-              <Settings className="h-3.5 w-3.5" /> Ayarlar
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="hidden sm:flex items-center gap-1.5 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              KKTC Vergi Sistemi
             </span>
           </div>
         </div>
-      </aside>
 
-      {/* ══════════════════════════════════════════════════
-          MOBILE HEADER (CurbWeight Style)
-      ══════════════════════════════════════════════════ */}
-      <header className="lg:hidden bg-[#f6f5f0] border-b border-[#e5e2d8] p-4 sticky top-0 z-40">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-serif text-2xl font-extrabold text-[#063b28]">
-              AutoBarem
-            </h1>
-            <p className="text-[10px] text-[#68706b] font-medium">
-              KKTC Seyrüsefer & TCO
-            </p>
+        {/* Kur uyarısı (fallback modunda) */}
+        {rateSource === "fallback" && !rateLoading && (
+          <div className="bg-amber-50 border-t border-amber-200 px-6 py-2 flex items-center gap-2 text-xs text-amber-700">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+            <span>
+              Canlı kur alınamadı. Yedek sabit kur (1 £ = {gbpRate.toFixed(2)} TL) kullanılıyor.
+              Gerçek fiyatlar farklı olabilir.
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="bg-[#f0eee6] border border-[#e5e2d8] rounded-xl px-3 py-1 text-xs font-bold text-[#063b28]">
-              {rateDisplay}
-            </div>
-          </div>
-        </div>
+        )}
       </header>
 
-      {/* ══════════════════════════════════════════════════
-          MAIN CONTENT WORKSPACE
-      ══════════════════════════════════════════════════ */}
-      <main className="flex-1 p-4 sm:p-8 space-y-8 max-w-7xl mx-auto w-full">
-        {/* Top Header & Data Sync Badge */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-[#063b28]">
-              Fleet Intelligence
-            </h2>
-            <p className="text-sm text-[#68706b] mt-1 max-w-2xl font-normal">
-              KKTC araç seyrüsefer vergisi ağırlık baremleri, 5 yıllık toplam sahip olma maliyeti (TCO) ve piyasa karşılaştırması.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-auto bg-[#f0eee6] border border-[#e5e2d8] px-3.5 py-1.5 rounded-full text-xs font-medium text-[#68706b]">
-            <span className="h-2 w-2 rounded-full bg-[#063b28] animate-pulse" />
-            <span>Data Sync: Live</span>
-          </div>
-        </div>
-
-        {/* ─── STAT CARDS ROW (CurbWeight Style) ─── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Card 1: Annual Tax */}
-          <Card className="rounded-3xl border border-[#e5e2d8] bg-white p-6 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#68706b] mb-2">
-              Seçilen Araçlar Yıllık Vergi
-            </p>
-            <div className="font-serif text-3xl sm:text-4xl font-bold text-[#063b28]">
-              {allCars.length > 0 ? formatTL(totalAnnualTax) : "₺0"}
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-[#68706b] mt-2">
-              <TrendingUp className="h-3.5 w-3.5 text-[#063b28]" />
-              <span>{allCars.length} araç karşılaştırılıyor</span>
-            </div>
-          </Card>
-
-          {/* Card 2: 5-Year TCO */}
-          <Card className="rounded-3xl border border-[#e5e2d8] bg-white p-6 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#68706b] mb-2">
-              5 Yıllık Toplam TCO
-            </p>
-            <div className="font-serif text-3xl sm:text-4xl font-bold text-[#111814]">
-              {allCars.length > 0 ? formatTL(totalTCO) : "₺0"}
-            </div>
-            <div className="text-xs text-[#68706b] mt-2">
-              Araç bedeli + vergi + 5 yıllık yakıt
-            </div>
-          </Card>
-
-          {/* Card 3: Live Rate */}
-          <Card className="rounded-3xl border border-[#e5e2d8] bg-white p-6 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#68706b] mb-2">
-              Sterlin Kuru (GBP/TRY)
-            </p>
-            <div className="font-serif text-3xl sm:text-4xl font-bold text-[#063b28]">
-              {gbpRate.toFixed(2)} ₺
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-[#68706b] mt-2">
-              <ShieldCheck className="h-3.5 w-3.5 text-[#063b28]" />
-              <span>{rateSource === "live" ? "Canlı TCMB / API" : "Sabit Yedek Kur"}</span>
-            </div>
-          </Card>
-        </div>
-
-        {/* ─── MAIN TWO COLUMN WORKSPACE ─── */}
+      {/* ─── MAIN ─── */}
+      <main className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8 items-start">
-          {/* ══════════════════════════════════════════════════
-              LEFT COLUMN — Controls & Parameters
-          ══════════════════════════════════════════════════ */}
-          <aside className="space-y-6">
-            {/* Tab Switcher (Veritabanı / Özel Araç) */}
-            <Card className="rounded-3xl p-2 bg-[#f0eee6] border border-[#e5e2d8]">
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setLeftTab("database")}
-                  className={`flex-1 flex items-center justify-center gap-2 rounded-2xl py-2.5 px-3 text-xs font-bold transition-all ${
-                    leftTab === "database"
-                      ? "bg-[#063b28] text-white shadow-sm"
-                      : "text-[#68706b] hover:text-[#111814]"
-                  }`}
-                >
-                  <BookOpen className="h-3.5 w-3.5" />
-                  Veritabanı
-                </button>
-                <button
-                  onClick={() => setLeftTab("custom")}
-                  className={`flex-1 flex items-center justify-center gap-2 rounded-2xl py-2.5 px-3 text-xs font-bold transition-all ${
-                    leftTab === "custom"
-                      ? "bg-[#063b28] text-white shadow-sm"
-                      : "text-[#68706b] hover:text-[#111814]"
-                  }`}
-                >
-                  <PenLine className="h-3.5 w-3.5" />
-                  Özel Araç
-                </button>
-              </div>
-            </Card>
 
-            {/* Selector or Form Card */}
-            <Card className="rounded-3xl border border-[#e5e2d8] bg-white p-6 shadow-sm">
-              {leftTab === "database" ? (
-                <div className="space-y-4">
-                  <h3 className="font-serif font-bold text-lg text-[#111814]">
-                    Araç Seçimi (Max 3)
-                  </h3>
+          {/* ══════════════════════════════════════════════════
+              SOL SÜTUN — Giriş Paneli
+          ══════════════════════════════════════════════════ */}
+          <aside className="space-y-6 lg:sticky lg:top-24">
+
+            {/* Sekme Seçici */}
+            <div className="flex bg-slate-100 rounded-xl p-1">
+              <button
+                onClick={() => setLeftTab("database")}
+                className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                  leftTab === "database"
+                    ? "bg-white text-slate-800 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                <BookOpen className="h-4 w-4" />
+                Araç Veritabanı
+              </button>
+              <button
+                onClick={() => setLeftTab("custom")}
+                className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                  leftTab === "custom"
+                    ? "bg-white text-slate-800 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                <PenLine className="h-4 w-4" />
+                Özel Araç
+              </button>
+            </div>
+
+            {/* Veritabanı Sekmesi */}
+            {leftTab === "database" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm text-slate-700 flex items-center gap-2">
+                    <CarIcon className="h-4 w-4 text-blue-500" />
+                    Araç Seçimi (en fazla 3)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <CarSelector
                     selectedCars={selectedCars.filter(
                       (c): c is Car => c !== null
@@ -370,125 +254,112 @@ export default function Home() {
                     onSelect={handleSelectCar}
                     maxSlots={MAX_CARS}
                   />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <h3 className="font-serif font-bold text-lg text-[#111814]">
-                    Özel Araç Bilgileri
-                  </h3>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Özel Araç Sekmesi */}
+            {leftTab === "custom" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm text-slate-700 flex items-center gap-2">
+                    <PenLine className="h-4 w-4 text-blue-500" />
+                    Özel Araç Bilgisi Gir
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <CustomCarForm
                     gbpRate={gbpRate}
                     onAddToComparison={handleAddCustomCar}
                     canAdd={canAddMore}
                   />
-                </div>
-              )}
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Simulation Parameters Box (CurbWeight Style) */}
-            <Card className="rounded-3xl border border-[#e5e2d8] bg-[#f0eee6]/70 p-6 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-serif font-bold text-base text-[#111814]">
-                  Simülasyon Parametreleri
-                </h3>
-                <SlidersHorizontal className="h-4 w-4 text-[#063b28]" />
-              </div>
-
-              <div className="space-y-4 pt-1">
-                {/* Fuel Price */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-[#68706b] uppercase tracking-wider">
-                      Yakıt Fiyatı
-                    </span>
-                    <span className="font-serif font-bold text-sm text-[#063b28]">
-                      {fuelPriceTL} TL/L
+            {/* Mobil: TCO Parametreleri */}
+            <Card className="lg:hidden">
+              <CardHeader>
+                <CardTitle className="text-sm text-slate-700">
+                  TCO Parametreleri
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {/* Mobil kur göstergesi */}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-blue-50 border border-blue-200">
+                  <div className="flex items-center gap-1.5">
+                    <PoundSterling className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-bold text-blue-800">
+                      {rateDisplay}
                     </span>
                   </div>
+                  {rateSource === "fallback" && (
+                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-500 font-medium">
+                    Yakıt Fiyatı (TL/litre)
+                  </label>
                   <Input
                     type="number"
                     value={fuelPriceTL}
                     onChange={(e) => setFuelPriceTL(Number(e.target.value))}
                     min={1}
-                    max={200}
-                    className="bg-white border-[#e5e2d8]"
                   />
                 </div>
-
-                {/* Annual Mileage */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-[#68706b] uppercase tracking-wider">
-                      Yıllık Kullanım
-                    </span>
-                    <span className="font-serif font-bold text-sm text-[#063b28]">
-                      {annualKm.toLocaleString("tr-TR")} km
-                    </span>
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-500 font-medium">
+                    Yıllık Kullanım (km)
+                  </label>
                   <Input
                     type="number"
                     value={annualKm}
                     onChange={(e) => setAnnualKm(Number(e.target.value))}
                     step={1000}
                     min={1000}
-                    max={100000}
-                    className="bg-white border-[#e5e2d8]"
                   />
                 </div>
-              </div>
-
-              <Button
-                variant="sand"
-                className="w-full rounded-2xl font-bold text-xs py-2.5 tracking-wide"
-                onClick={() => {
-                  /* trigger recalculation */
-                }}
-              >
-                <RefreshCw className="h-3.5 w-3.5 mr-2" />
-                Yeniden Hesapla
-              </Button>
+              </CardContent>
             </Card>
 
-            {/* Barem Reference Table */}
+            {/* Barem Referans Tablosu */}
             <BaremReference />
           </aside>
 
           {/* ══════════════════════════════════════════════════
-              RIGHT COLUMN — Collection Cards & Analysis
+              SAĞ SÜTUN — Sonuçlar Paneli
           ══════════════════════════════════════════════════ */}
           <section className="space-y-8">
-            {/* Empty State */}
-            {allCars.length === 0 && (
-              <Card className="rounded-3xl border-2 border-dashed border-[#e5e2d8] bg-white/60 p-12 text-center">
-                <div className="flex flex-col items-center justify-center space-y-3">
-                  <div className="h-16 w-16 rounded-full bg-[#f0eee6] flex items-center justify-center text-[#063b28]">
-                    <CarIcon className="h-8 w-8 opacity-60" />
-                  </div>
-                  <h3 className="font-serif text-2xl font-bold text-[#111814]">
-                    Karşılaştırma Başlatılmadı
-                  </h3>
-                  <p className="text-sm text-[#68706b] max-w-sm">
-                    Sol panelden veritabanı araçlarını seçin veya özel araç ekleyerek KKTC seyrüsefer ve 5 yıllık TCO analizi başlatın.
-                  </p>
-                  <Badge variant="sand" className="mt-2 py-1 px-3">
-                    <Sparkles className="h-3.5 w-3.5 mr-1 text-[#063b28]" />
-                    Sterlin (£) Kuru Canlı Entegre
-                  </Badge>
-                </div>
-              </Card>
-            )}
 
-            {/* Selected Cars Collection (Porsche Taycan / DB5 Card style) */}
-            {allCars.length > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-serif text-2xl font-bold text-[#063b28]">
-                    Seçilen Araç Filosu
-                  </h3>
-                  <span className="text-xs text-[#68706b] font-medium">
-                    {allCars.length} / {MAX_CARS} Araç
+            {/* Boş Durum */}
+            {allCars.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-24 text-center text-slate-400 bg-white/60 rounded-2xl border border-dashed border-slate-300">
+                <CarIcon className="h-14 w-14 mb-4 opacity-30" />
+                <h2 className="text-lg font-semibold text-slate-500 mb-1">
+                  Karşılaştırma başlatılmadı
+                </h2>
+                <p className="text-sm max-w-xs">
+                  Sol panelden araç veritabanından seçim yapın ya da kendi araç
+                  bilgilerinizi girin.
+                </p>
+                <div className="mt-4 flex items-center gap-2 text-xs text-blue-600 bg-blue-50 border border-blue-200 px-4 py-2 rounded-full">
+                  <PoundSterling className="h-3.5 w-3.5" />
+                  <span>
+                    Araç fiyatları Sterlin (£) · Seyrüsefer vergisi TL cinsindendir
                   </span>
                 </div>
+              </div>
+            )}
+
+            {/* Vergi Gösterimi */}
+            {allCars.length > 0 && (
+              <div>
+                <SectionHeader
+                  icon={<ShieldCheck className="h-5 w-5" />}
+                  title="Seyrüsefer Vergisi — Barem & Detay"
+                  subtitle="KKTC ağırlık baremlerine göre yıllık vergi hesabı (TL)"
+                />
                 <TaxDisplay
                   cars={allCars}
                   gbpRate={gbpRate}
@@ -497,29 +368,14 @@ export default function Home() {
               </div>
             )}
 
-            {/* TCO Projected Trajectory Analysis Chart */}
+            {/* Karşılaştırma Tablosu */}
             {allCars.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="font-serif text-2xl font-bold text-[#063b28]">
-                  5 Yıllık TCO Analizi
-                </h3>
-                <Card className="rounded-3xl border border-[#e5e2d8] bg-white p-6 shadow-sm">
-                  <TCOChart
-                    cars={allCars}
-                    gbpRate={gbpRate}
-                    fuelPriceTL={fuelPriceTL}
-                    annualKm={annualKm}
-                  />
-                </Card>
-              </div>
-            )}
-
-            {/* Market Comparison Table */}
-            {allCars.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="font-serif text-2xl font-bold text-[#063b28]">
-                  Detaylı Karşılaştırma Tablosu
-                </h3>
+              <div>
+                <SectionHeader
+                  icon={<TableIcon className="h-5 w-5" />}
+                  title="Karşılaştırma Tablosu"
+                  subtitle={`Fiyat £ (TL karşılığı) · Barem · Yıllık vergi (TL) · Yakıt tüketimi — 1 £ = ${gbpRate.toFixed(2)} TL`}
+                />
                 <ComparisonTable
                   cars={allCars}
                   gbpRate={gbpRate}
@@ -527,67 +383,80 @@ export default function Home() {
                 />
               </div>
             )}
+
+            {/* TCO Grafiği */}
+            {allCars.length > 0 && (
+              <div>
+                <SectionHeader
+                  icon={<BarChart3 className="h-5 w-5" />}
+                  title="5 Yıllık Toplam Sahip Olma Maliyeti (TCO)"
+                  subtitle={`${annualKm.toLocaleString("tr-TR")} km/yıl · ${fuelPriceTL} TL/litre · 5 yıl · Araç fiyatı 1 £ = ${gbpRate.toFixed(2)} TL üzerinden TL'ye çevrildi`}
+                />
+                <Card>
+                  <CardContent className="pt-5">
+                    <TCOChart
+                      cars={allCars}
+                      gbpRate={gbpRate}
+                      fuelPriceTL={fuelPriceTL}
+                      annualKm={annualKm}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </section>
         </div>
       </main>
 
-      {/* ══════════════════════════════════════════════════
-          MOBILE BOTTOM NAVIGATION (CurbWeight Image 2 Style)
-      ══════════════════════════════════════════════════ */}
-      <div className="lg:hidden fixed bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border border-[#e5e2d8] rounded-3xl p-2 shadow-xl z-50 flex items-center justify-around">
-        <button
-          onClick={() => setActiveNav("dashboard")}
-          className={`flex flex-col items-center gap-1 p-2.5 rounded-2xl transition-all ${
-            activeNav === "dashboard"
-              ? "bg-[#063b28] text-white px-5"
-              : "text-[#68706b]"
-          }`}
-        >
-          <LayoutGrid className="h-5 w-5" />
-          <span className="text-[10px] font-bold">Dashboard</span>
-        </button>
+      {/* ─── FOOTER ─── */}
+      <footer className="mt-16 border-t border-slate-200 bg-white py-6 px-6 text-center text-xs text-slate-400">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <TrendingUp className="h-3.5 w-3.5 text-blue-400" />
+          <span>
+            Döviz kuru:{" "}
+            <span className="font-semibold text-slate-600">
+              1 £ = {gbpRate.toFixed(4)} TL
+            </span>{" "}
+            ·{" "}
+            {rateSource === "live"
+              ? "Canlı veriler (exchangerate-api.com)"
+              : "Yedek sabit kur"}
+          </span>
+        </div>
+        <p>
+          AutoBarem KKTC — Seyrüsefer vergisi hesaplamaları bilgi amaçlıdır.
+          Resmi vergi tutarları için{" "}
+          <span className="text-blue-500 font-medium">
+            KKTC Maliye Bakanlığı
+          </span>
+          'na başvurunuz.
+        </p>
+        <p className="mt-1 text-slate-300">
+          Araç fiyatları KKTC piyasa değerlerini yansıtır ve piyasa koşullarına
+          göre değişebilir.
+        </p>
+      </footer>
+    </div>
+  );
+}
 
-        <button
-          onClick={() => {
-            setActiveNav("database");
-            setLeftTab("database");
-          }}
-          className={`flex flex-col items-center gap-1 p-2.5 rounded-2xl transition-all ${
-            activeNav === "database"
-              ? "bg-[#063b28] text-white px-5"
-              : "text-[#68706b]"
-          }`}
-        >
-          <BookOpen className="h-5 w-5" />
-          <span className="text-[10px] font-bold">Veritabanı</span>
-        </button>
-
-        <button
-          onClick={() => {
-            setActiveNav("custom");
-            setLeftTab("custom");
-          }}
-          className={`flex flex-col items-center gap-1 p-2.5 rounded-2xl transition-all ${
-            activeNav === "custom"
-              ? "bg-[#063b28] text-white px-5"
-              : "text-[#68706b]"
-          }`}
-        >
-          <PenLine className="h-5 w-5" />
-          <span className="text-[10px] font-bold">Özel Araç</span>
-        </button>
-
-        <button
-          onClick={() => setActiveNav("barem")}
-          className={`flex flex-col items-center gap-1 p-2.5 rounded-2xl transition-all ${
-            activeNav === "barem"
-              ? "bg-[#063b28] text-white px-5"
-              : "text-[#68706b]"
-          }`}
-        >
-          <TableIcon className="h-5 w-5" />
-          <span className="text-[10px] font-bold">Barem</span>
-        </button>
+function SectionHeader({
+  icon,
+  title,
+  subtitle,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 mb-4">
+      <div className="bg-blue-100 text-blue-600 p-2 rounded-lg mt-0.5 shrink-0">
+        {icon}
+      </div>
+      <div>
+        <h2 className="font-bold text-slate-800">{title}</h2>
+        <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
       </div>
     </div>
   );
