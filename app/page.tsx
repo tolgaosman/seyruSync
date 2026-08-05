@@ -137,25 +137,25 @@ export default function Home() {
           </div>
 
           {/* Canlı Kur Göstergesi */}
-          <div className="hidden md:flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2">
-            <div className="flex items-center gap-1.5">
-              <PoundSterling className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-bold text-blue-800">
+          <div className="hidden md:flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-3 py-1.5 whitespace-nowrap shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <PoundSterling className="h-4 w-4 text-blue-600 shrink-0" />
+              <span className="text-sm font-bold text-blue-800 whitespace-nowrap">
                 {rateDisplay}
               </span>
             </div>
-            <div className="h-4 w-px bg-blue-200" />
-            <div className="flex items-center gap-1">
+            <div className="h-4 w-px bg-blue-200 shrink-0" />
+            <div className="flex items-center gap-1 shrink-0">
               {rateSource === "live" ? (
-                <Wifi className="h-3.5 w-3.5 text-emerald-500" />
+                <Wifi className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
               ) : rateSource === "fallback" ? (
-                <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+                <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
               ) : (
-                <RefreshCw className="h-3.5 w-3.5 text-slate-400 animate-spin" />
+                <RefreshCw className="h-3.5 w-3.5 text-slate-400 animate-spin shrink-0" />
               )}
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-500 whitespace-nowrap">
                 {rateSource === "live"
-                  ? `Canlı · ${fetchedDate ?? ""}`
+                  ? `Canlı ${fetchedDate ?? ""}`
                   : rateSource === "fallback"
                   ? "Yedek kur"
                   : "Yükleniyor"}
@@ -164,7 +164,7 @@ export default function Home() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 text-blue-400 hover:text-blue-600"
+              className="h-6 w-6 text-blue-400 hover:text-blue-600 shrink-0"
               onClick={refreshRate}
               title="Kuru yenile"
             >
@@ -173,12 +173,12 @@ export default function Home() {
           </div>
 
           {/* TCO Parametreleri (masaüstü) */}
-          <div className="hidden lg:flex items-center gap-4 text-sm text-slate-500">
-            <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1 text-xs">
-              <Fuel className="h-4 w-4 text-emerald-600" />
-              <span className="text-xs font-semibold text-slate-700">KKTC Benzin:</span>
-              <span className="font-bold text-emerald-800">{fuelPriceTL.toFixed(2)} TL/L</span>
-              <span className="text-[10px] text-emerald-600 font-medium">· Güncelleme: {fuelLastUpdated}</span>
+          <div className="hidden lg:flex items-center gap-4 text-sm text-slate-500 shrink-0">
+            <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1.5 text-xs whitespace-nowrap shrink-0">
+              <Fuel className="h-4 w-4 text-emerald-600 shrink-0" />
+              <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">KKTC Benzin:</span>
+              <span className="font-bold text-emerald-800 whitespace-nowrap">{fuelPriceTL.toFixed(2)} TL/L</span>
+              <span className="text-[11px] text-emerald-600 font-medium whitespace-nowrap">· Güncelleme: {fuelLastUpdated}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Route className="h-4 w-4 text-slate-400" />
