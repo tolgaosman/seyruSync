@@ -7,6 +7,7 @@ import { TaxDisplay } from "@/components/TaxDisplay";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { TCOChart } from "@/components/TCOChart";
 import { BaremReference } from "@/components/BaremReference";
+import { FuelPricesTable } from "@/components/FuelPricesTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -52,10 +53,12 @@ export default function Home() {
 
   // Canlı & Günlük Otomatik KKTC Benzin TL/L Fiyatı
   const {
-    fuelPriceTL: liveFuelPriceTL,
+    prices,
     lastUpdated: fuelLastUpdated,
     refresh: refreshFuelPrice,
   } = useFuelPrice();
+
+  const liveFuelPriceTL = prices?.oktan95 || DEFAULT_FUEL_PRICE_TL;
 
   const [fuelPriceTL, setFuelPriceTL] = useState<number>(DEFAULT_FUEL_PRICE_TL);
 
@@ -152,12 +155,6 @@ export default function Home() {
 
           {/* TCO Parametreleri (masaüstü) */}
           <div className="hidden lg:flex items-center gap-4 text-sm text-slate-500 shrink-0">
-            <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1.5 text-xs whitespace-nowrap shrink-0">
-              <Fuel className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span className="text-xs font-semibold text-slate-700 whitespace-nowrap">KKTC Benzin:</span>
-              <span className="font-bold text-emerald-800 whitespace-nowrap">{fuelPriceTL.toFixed(2)} TL/L</span>
-              <span className="text-[11px] text-emerald-600 font-medium whitespace-nowrap">· Güncelleme: {fuelLastUpdated}</span>
-            </div>
             <div className="flex items-center gap-1.5">
               <Route className="h-4 w-4 text-slate-400" />
               <span className="text-xs">Yıllık:</span>
@@ -244,18 +241,6 @@ export default function Home() {
                   )}
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-500 font-medium flex items-center justify-between">
-                    <span>KKTC Benzin Fiyatı (TL/litre)</span>
-                    <span className="text-[10px] text-emerald-600 font-semibold">Güncelleme: {fuelLastUpdated}</span>
-                  </label>
-                  <Input
-                    type="number"
-                    value={fuelPriceTL}
-                    disabled
-                    className="bg-slate-100 font-bold text-slate-700 cursor-not-allowed"
-                  />
-                </div>
-                <div className="space-y-1">
                   <label className="text-xs text-slate-500 font-medium">
                     Yıllık Kullanım (km)
                   </label>
@@ -278,6 +263,9 @@ export default function Home() {
               SAĞ SÜTUN — Sonuçlar Paneli
           ══════════════════════════════════════════════════ */}
           <section className="space-y-8">
+            
+            {/* Akaryakıt Fiyatları Tablosu */}
+            <FuelPricesTable />
 
             {/* Boş Durum */}
             {allCars.length === 0 && (
