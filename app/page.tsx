@@ -8,6 +8,7 @@ import { ComparisonTable } from "@/components/ComparisonTable";
 import { TCOChart } from "@/components/TCOChart";
 import { BaremReference } from "@/components/BaremReference";
 import { FuelPricesTable } from "@/components/FuelPricesTable";
+import { ExchangeRatesTable } from "@/components/ExchangeRatesTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -117,41 +118,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Canlı Kur Göstergesi */}
-          <div className="hidden md:flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-3 py-1.5 whitespace-nowrap shrink-0">
-            <div className="flex items-center gap-1.5 shrink-0">
-              <PoundSterling className="h-4 w-4 text-blue-600 shrink-0" />
-              <span className="text-sm font-bold text-blue-800 whitespace-nowrap">
-                {rateDisplay}
-              </span>
-            </div>
-            <div className="h-4 w-px bg-blue-200 shrink-0" />
-            <div className="flex items-center gap-1 shrink-0">
-              {rateSource === "live" ? (
-                <Wifi className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-              ) : rateSource === "fallback" ? (
-                <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-              ) : (
-                <RefreshCw className="h-3.5 w-3.5 text-slate-400 animate-spin shrink-0" />
-              )}
-              <span className="text-xs text-slate-500 whitespace-nowrap">
-                {rateSource === "live"
-                  ? `Canlı ${fetchedDate ?? ""}`
-                  : rateSource === "fallback"
-                    ? "Yedek kur"
-                    : "Yükleniyor"}
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-blue-400 hover:text-blue-600 shrink-0"
-              onClick={refreshRate}
-              title="Kuru yenile"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+          {/* Kur Göstergesi sağ sütuna taşındı */}
 
           {/* TCO Parametreleri (masaüstü) */}
           <div className="hidden lg:flex items-center gap-4 text-sm text-slate-500 shrink-0">
@@ -266,6 +233,9 @@ export default function Home() {
             
             {/* Akaryakıt Fiyatları Tablosu */}
             <FuelPricesTable />
+            
+            {/* Döviz Kurları ve Çevirici Tablosu */}
+            <ExchangeRatesTable />
 
             {/* Boş Durum */}
             {allCars.length === 0 && (
