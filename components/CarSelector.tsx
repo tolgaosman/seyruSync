@@ -186,9 +186,9 @@ export function CarSelector({
             className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-200">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                Araç {idx + 1}
+            <div className={`flex items-center justify-between px-4 py-2.5 border-b border-slate-200 ${idx === 0 ? "bg-blue-50/50" : "bg-slate-50"}`}>
+              <span className={`text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 ${idx === 0 ? "text-blue-600" : "text-slate-500"}`}>
+                {idx === 0 ? "📍 Mevcut Aracım" : `🎯 Hedef Araç ${idx}`}
               </span>
               {selected && (
                 <Button

@@ -6,6 +6,7 @@ import { CarSelector } from "@/components/CarSelector";
 import { TaxDisplay } from "@/components/TaxDisplay";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { TCOChart } from "@/components/TCOChart";
+import { BaselineSummary } from "@/components/BaselineSummary";
 import { BaremReference } from "@/components/BaremReference";
 import { FuelPricesTable } from "@/components/FuelPricesTable";
 import { ExchangeRatesTable } from "@/components/ExchangeRatesTable";
@@ -222,14 +223,15 @@ export default function Home() {
               </div>
             )}
 
-            {/* Vergi Gösterimi */}
+            {/* Vergi Gösterimi & Baseline Özeti */}
             {allCars.length > 0 && (
-              <div>
+              <div className="space-y-4">
                 <SectionHeader
                   icon={<ShieldCheck className="h-5 w-5" />}
                   title="Seyrüsefer Vergisi — Barem & Detay"
                   subtitle="KKTC ağırlık baremlerine göre yıllık vergi hesabı (TL)"
                 />
+                <BaselineSummary cars={allCars} />
                 <TaxDisplay
                   cars={allCars}
                   gbpRate={gbpRate}
@@ -259,8 +261,8 @@ export default function Home() {
               <div>
                 <SectionHeader
                   icon={<BarChart3 className="h-5 w-5" />}
-                  title="5 Yıllık Toplam Sahip Olma Maliyeti (TCO)"
-                  subtitle={`${annualKm.toLocaleString("tr-TR")} km/yıl · ${liveFuelPriceTL} TL/litre · 5 yıl · Araç fiyatı 1 £ = ${gbpRate.toFixed(2)} TL&apos;ye çevrildi`}
+                  title="Toplam Sahip Olma Maliyeti (TCO)"
+                  subtitle={`${annualKm.toLocaleString("tr-TR")} km/yıl · ${liveFuelPriceTL} TL/litre · Araç fiyatı 1 £ = ${gbpRate.toFixed(2)} TL&apos;ye çevrildi`}
                 />
                 <Card>
                   <CardContent className="pt-5">

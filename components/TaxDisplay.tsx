@@ -54,10 +54,27 @@ export function TaxDisplay({ cars, gbpRate, onRemove }: TaxDisplayProps) {
                   <CardTitle className="text-base font-bold text-slate-800">
                     {car.year} {car.brand} {car.model}
                   </CardTitle>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-slate-400 mt-0.5 mb-2">
                     {car.fuelType}
                     {car.engineCC ? ` · ${car.engineCC}cc` : ""}
                   </p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                    {tax.ageDiscountApplied && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        ✨ %{tax.ageDiscountPct} Yaş İndirimi
+                      </span>
+                    )}
+                    {car.fuelType === "Elektrik" && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                        ⚡ Genişletilmiş Barem
+                      </span>
+                    )}
+                    {car.fuelType?.toLowerCase().includes("hibrit") && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                        🍃 Düşük Tüketim Avantajı
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge
