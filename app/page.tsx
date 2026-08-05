@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Car } from "@/types";
 import { CarSelector } from "@/components/CarSelector";
-import { CustomCarForm } from "@/components/CustomCarForm";
 import { TaxDisplay } from "@/components/TaxDisplay";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { TCOChart } from "@/components/TCOChart";
@@ -24,8 +23,6 @@ import {
   BarChart3,
   TableIcon,
   ShieldCheck,
-  BookOpen,
-  PenLine,
   PoundSterling,
   TrendingUp,
   RefreshCw,
@@ -34,7 +31,6 @@ import {
 } from "lucide-react";
 
 const MAX_CARS = 3;
-type LeftTab = "database" | "custom";
 
 export default function Home() {
   const [selectedCars, setSelectedCars] = useState<(Car | null)[]>([
@@ -42,9 +38,7 @@ export default function Home() {
     null,
     null,
   ]);
-  const [customCars, setCustomCars] = useState<Car[]>([]);
   const [annualKm, setAnnualKm] = useState<number>(DEFAULT_ANNUAL_KM);
-  const [leftTab, setLeftTab] = useState<LeftTab>("database");
 
   // Canlı GBP → TL kuru
   const {
@@ -72,11 +66,8 @@ export default function Home() {
     }
   }, [liveFuelPriceTL]);
 
-  // Seçilen tüm araçlar (DB + özel)
-  const allCars: Car[] = [
-    ...selectedCars.filter((c): c is Car => c !== null),
-    ...customCars,
-  ].slice(0, MAX_CARS);
+  // Seçilen tüm araçlar
+  const allCars: Car[] = selectedCars.filter((c): c is Car => c !== null).slice(0, MAX_CARS);
 
   const handleSelectCar = useCallback((car: Car | null, index: number) => {
     setSelectedCars((prev) => {
@@ -88,20 +79,7 @@ export default function Home() {
 
   const handleRemoveCar = useCallback((id: string) => {
     setSelectedCars((prev) => prev.map((c) => (c?.id === id ? null : c)));
-    setCustomCars((prev) => prev.filter((c) => c.id !== id));
   }, []);
-
-  const handleAddCustomCar = useCallback(
-    (car: Car) => {
-      const currentCount =
-        selectedCars.filter(Boolean).length + customCars.length;
-      if (currentCount >= MAX_CARS) return;
-      setCustomCars((prev) => [...prev, car]);
-    },
-    [selectedCars, customCars]
-  );
-
-  const canAddMore = allCars.length < MAX_CARS;
 
   // Kur gösterim metni
   const rateDisplay = rateLoading
@@ -226,69 +204,24 @@ export default function Home() {
           ══════════════════════════════════════════════════ */}
           <aside className="space-y-6 lg:sticky lg:top-24">
 
-            {/* Sekme Seçici */}
-            <div className="flex bg-slate-100 rounded-xl p-1">
-              <button
-                onClick={() => setLeftTab("database")}
-                className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${leftTab === "database"
-                    ? "bg-white text-slate-800 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                  }`}
-              >
-                <BookOpen className="h-4 w-4" />
-                Araç Veritabanı
-              </button>
-              <button
-                onClick={() => setLeftTab("custom")}
-                className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${leftTab === "custom"
-                    ? "bg-white text-slate-800 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                  }`}
-              >
-                <PenLine className="h-4 w-4" />
-                Özel Araç
-              </button>
-            </div>
-
-            {/* Veritabanı Sekmesi */}
-            {leftTab === "database" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm text-slate-700 flex items-center gap-2">
-                    <CarIcon className="h-4 w-4 text-blue-500" />
-                    Araç Seçimi (en fazla 3)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CarSelector
-                    selectedCars={selectedCars.filter(
-                      (c): c is Car => c !== null
-                    )}
-                    onSelect={handleSelectCar}
-                    maxSlots={MAX_CARS}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Özel Araç Sekmesi */}
-            {leftTab === "custom" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm text-slate-700 flex items-center gap-2">
-                    <PenLine className="h-4 w-4 text-blue-500" />
-                    Özel Araç Bilgisi Gir
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CustomCarForm
-                    gbpRate={gbpRate}
-                    onAddToComparison={handleAddCustomCar}
-                    canAdd={canAddMore}
-                  />
-                </CardContent>
-              </Card>
-            )}
+            {/* Araç Seçimi */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm text-slate-700 flex items-center gap-2">
+                  <CarIcon className="h-4 w-4 text-blue-500" />
+                  Araç Seçimi (en fazla 3)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CarSelector
+                  selectedCars={selectedCars.filter(
+                    (c): c is Car => c !== null
+                  )}
+                  onSelect={handleSelectCar}
+                  maxSlots={MAX_CARS}
+                />
+              </CardContent>
+            </Card>
 
             {/* Mobil: TCO Parametreleri */}
             <Card className="lg:hidden">
