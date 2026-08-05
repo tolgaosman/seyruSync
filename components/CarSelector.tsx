@@ -188,7 +188,7 @@ export function CarSelector({
             {/* Header */}
             <div className={`flex items-center justify-between px-4 py-2.5 border-b border-slate-200 ${idx === 0 ? "bg-blue-50/50" : "bg-slate-50"}`}>
               <span className={`text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 ${idx === 0 ? "text-blue-600" : "text-slate-500"}`}>
-                {idx === 0 ? "📍 Mevcut Aracım" : `🎯 Hedef Araç ${idx}`}
+                Araç {idx + 1}
               </span>
               {selected && (
                 <Button
@@ -249,7 +249,7 @@ export function CarSelector({
                               s.loadingModels
                                 ? "Yükleniyor..."
                                 : !s.make
-                                ? "Model (Önce marka)"
+                                ? "Model"
                                 : "Model seçin..."
                             }
                           />
@@ -287,7 +287,7 @@ export function CarSelector({
                               s.loadingYears
                                 ? "Yükleniyor..."
                                 : !s.model
-                                ? "Kasa Yılı (Önce model)"
+                                ? "Kasa Yılı"
                                 : "Kasa yılı seçin..."
                             }
                           />
@@ -326,7 +326,7 @@ export function CarSelector({
                               s.loadingEngines
                                 ? "Yükleniyor..."
                                 : !s.year
-                                ? "Motor Hacmi (Önce yıl)"
+                                ? "Motor Hacmi"
                                 : "Motor hacmi seçin..."
                             }
                           />
