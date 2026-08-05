@@ -299,7 +299,7 @@ function buildFallbackEngines(make: string, model: string): EngineOption[] {
   ];
 
   // Ekstra Ağır Lüks / Büyük SUV (7 Serisi, S-Class, X5, Range Rover vs.)
-  const isExtraHeavy = ["7 series", "8 series", "s-class", "a8", "q7", "q8", "x5", "x6", "x7", "gle", "gls", "g-class", "range rover", "cayenne", "touareg", "xc90", "land cruiser", "lx"].some(k => full.includes(k));
+  const isExtraHeavy = ["7 series", "s-class", "a8", "q7", "q8", "x5", "x6", "x7", "gle", "gls", "g-class", "range rover", "cayenne", "touareg", "xc90", "land cruiser", "lx"].some(k => full.includes(k));
   // Standart Lüks / Spor / D-E Segment (3 Serisi, 5 Serisi, C-Class, E-Class, X3 vb.)
   const isLargeLuxury = ["bmw", "mercedes", "audi", "lexus", "land rover", "porsche", "volvo", "jaguar", "ferrari", "bentley", "maserati"].some(k => full.includes(k));
   // Çok Hafif / A Segmenti
