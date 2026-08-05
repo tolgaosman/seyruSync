@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { ExchangeRateData } from "@/types";
 
-const FALLBACK_RATE = 45;
+const FALLBACK_RATE = 45.2;
 
 export interface UseExchangeRateResult {
   rate: number;          // 1 GBP = ? TL
@@ -24,30 +23,55 @@ export function useExchangeRate(): UseExchangeRateResult {
   const fetchRate = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+
+    // Provider 1: open.er-api.com
     try {
       const res = await fetch("https://open.er-api.com/v6/latest/GBP");
-      if (!res.ok) throw new Error("API yanıt vermedi");
-      const data = await res.json();
-      const tryRate: number = data?.rates?.TRY;
-      if (!tryRate || typeof tryRate !== "number") {
-        throw new Error("Kur verisi bulunamadı");
+      if (res.ok) {
+        const data = await res.json();
+        const tryRate: number = data?.rates?.TRY;
+        if (tryRate && typeof tryRate === "number") {
+          setRate(Number(tryRate.toFixed(4)));
+          setSource("live");
+          setFetchedAt(new Date().toISOString());
+          setIsLoading(false);
+          return;
+        }
       }
-      setRate(tryRate);
-      setSource("live");
-      setFetchedAt(new Date().toISOString());
-    } catch (err) {
-      setError("Kur verisi alınamadı, yedek kur kullanılıyor.");
-      setRate(FALLBACK_RATE);
-      setSource("fallback");
-    } finally {
-      setIsLoading(false);
+    } catch (e) {
+      console.warn("Primary exchange rate provider failed, trying secondary:", e);
     }
+
+    // Provider 2: Fawazahmed0 currency API
+    try {
+      const res = await fetch(
+        "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/gbp.json"
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const tryRate: number = data?.gbp?.try;
+        if (tryRate && typeof tryRate === "number") {
+          setRate(Number(tryRate.toFixed(4)));
+          setSource("live");
+          setFetchedAt(new Date().toISOString());
+          setIsLoading(false);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Secondary exchange rate provider failed:", e);
+    }
+
+    // Fallback
+    setError("Canlı kur verisi çekilemedi, KKTC güncel yedek kur kullanılıyor.");
+    setRate(FALLBACK_RATE);
+    setSource("fallback");
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
     fetchRate();
-    // Her 30 dakikada otomatik yenile
-    const interval = setInterval(fetchRate, 30 * 60 * 1000);
+    const interval = setInterval(fetchRate, 15 * 60 * 1000); // 15 dk bir canlı yenile
     return () => clearInterval(interval);
   }, [fetchRate]);
 

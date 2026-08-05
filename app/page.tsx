@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Car } from "@/types";
 import { CarSelector } from "@/components/CarSelector";
 import { CustomCarForm } from "@/components/CustomCarForm";
@@ -16,6 +16,7 @@ import {
   DEFAULT_ANNUAL_KM,
 } from "@/utils/taxCalculator";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
+import { useFuelPrice } from "@/hooks/useFuelPrice";
 import {
   Car as CarIcon,
   Fuel,
@@ -42,12 +43,34 @@ export default function Home() {
     null,
   ]);
   const [customCars, setCustomCars] = useState<Car[]>([]);
-  const [fuelPriceTL, setFuelPriceTL] = useState<number>(DEFAULT_FUEL_PRICE_TL);
   const [annualKm, setAnnualKm] = useState<number>(DEFAULT_ANNUAL_KM);
   const [leftTab, setLeftTab] = useState<LeftTab>("database");
 
   // Canlı GBP → TL kuru
-  const { rate: gbpRate, source: rateSource, fetchedAt, isLoading: rateLoading, error: rateError, refresh: refreshRate } = useExchangeRate();
+  const {
+    rate: gbpRate,
+    source: rateSource,
+    fetchedAt,
+    isLoading: rateLoading,
+    error: rateError,
+    refresh: refreshRate,
+  } = useExchangeRate();
+
+  // Canlı KKTC Benzin TL/L Fiyatı
+  const {
+    fuelPriceTL: liveFuelPriceTL,
+    source: fuelSource,
+    refresh: refreshFuel,
+  } = useFuelPrice();
+
+  const [fuelPriceTL, setFuelPriceTL] = useState<number>(DEFAULT_FUEL_PRICE_TL);
+
+  // Canlı benzin fiyatı geldiğinde state'i güncelle
+  useEffect(() => {
+    if (liveFuelPriceTL && liveFuelPriceTL > 0) {
+      setFuelPriceTL(liveFuelPriceTL);
+    }
+  }, [liveFuelPriceTL]);
 
   // Seçilen tüm araçlar (DB + özel)
   const allCars: Car[] = [
