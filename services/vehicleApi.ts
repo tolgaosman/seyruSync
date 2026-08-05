@@ -274,8 +274,10 @@ function buildFallbackEngines(make: string, model: string): EngineOption[] {
 
   // Lüks / Spor / Büyük SUV
   const isLargeLuxury = ["bmw", "mercedes", "audi", "lexus", "land rover", "porsche", "volvo", "jaguar", "ferrari", "bentley", "maserati"].some(k => full.includes(k));
+  // Çok Hafif / A Segmenti
+  const isUltraLight = ["swift", "picanto", "i10", "aygo", "c1", "108"].some(k => full.includes(k));
   // Kompakt / Küçük
-  const isSmall = ["picanto", "i10", "i20", "fiesta", "corsa", "clio", "polo", "yaris", "swift", "micra", "500", "aygo"].some(k => full.includes(k));
+  const isSmall = ["i20", "fiesta", "corsa", "clio", "polo", "yaris", "micra", "500", "sandero"].some(k => full.includes(k));
 
   if (isLargeLuxury) {
     return [
@@ -285,6 +287,14 @@ function buildFallbackEngines(make: string, model: string): EngineOption[] {
       { cc: 2000, fuelType: "Dizel",  trim: "", weightKg: 1700, fuelConsumption: 6.5, label: "2000 cc Dizel" },
       { cc: 3000, fuelType: "Dizel",  trim: "", weightKg: 1900, fuelConsumption: 7.5, label: "3000 cc Dizel" },
       { cc: 2000, fuelType: "Hibrit", trim: "", weightKg: 1800, fuelConsumption: 5.5, label: "2000 cc Hibrit" },
+    ];
+  }
+
+  if (isUltraLight) {
+    return [
+      { cc: 1000, fuelType: "Benzin", trim: "", weightKg: 920, fuelConsumption: 4.5, label: "1000 cc Benzin" },
+      { cc: 1200, fuelType: "Benzin", trim: "", weightKg: 960, fuelConsumption: 4.8, label: "1200 cc Benzin" },
+      { cc: 1200, fuelType: "Hibrit", trim: "", weightKg: 990, fuelConsumption: 4.3, label: "1200 cc Hibrit" },
     ];
   }
 
