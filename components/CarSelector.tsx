@@ -149,8 +149,8 @@ export function CarSelector({
     const errors: SlotState["errors"] = {};
     if (!s.make) errors.make = "Marka seçilmedi";
     if (!s.model) errors.model = "Model seçilmedi";
-    if (!s.year) errors.year = "Yıl seçilmedi";
-    if (!s.engine) errors.engine = "Motor hacmi seçilmedi";
+    if (!s.year) errors.year = "Yeni kasa yılı seçilmedi";
+    if (!s.engine) errors.engine = "Motor seçilmedi";
 
     if (Object.keys(errors).length > 0) {
       updateSlot(idx, { errors });
@@ -288,7 +288,7 @@ export function CarSelector({
                                 ? "Yükleniyor..."
                                 : !s.model
                                 ? "Önce model"
-                                : "Yıl seçin..."
+                                : "Yeni kasa yılı seçin..."
                             }
                           />
                         </SelectTrigger>
