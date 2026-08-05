@@ -16,7 +16,7 @@ export interface UseFuelPriceResult {
 export function useFuelPrice(): UseFuelPriceResult {
   const [fuelPriceTL, setFuelPriceTL] = useState<number>(61.12);
   const [source, setSource] = useState<"live" | "cached">("cached");
-  const [lastUpdated, setLastUpdated] = useState<string>("05.08.2026 13:28");
+  const [lastUpdated, setLastUpdated] = useState<string>("05.08.2026");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,18 +24,13 @@ export function useFuelPrice(): UseFuelPriceResult {
     setIsLoading(true);
     setError(null);
 
-    const formatTimestamp = () => {
+    const formatDate = () => {
       const now = new Date();
-      const dateStr = now.toLocaleDateString("tr-TR", {
+      return now.toLocaleDateString("tr-TR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
       });
-      const timeStr = now.toLocaleTimeString("tr-TR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      return `${dateStr} ${timeStr}`;
     };
 
     // Proxy 1: api.allorigins.win
@@ -54,7 +49,7 @@ export function useFuelPrice(): UseFuelPriceResult {
           if (!isNaN(parsedPrice) && parsedPrice > 20 && parsedPrice < 200) {
             setFuelPriceTL(parsedPrice);
             setSource("live");
-            setLastUpdated(formatTimestamp());
+            setLastUpdated(formatDate());
             setIsLoading(false);
             return;
           }
@@ -79,7 +74,7 @@ export function useFuelPrice(): UseFuelPriceResult {
           if (!isNaN(parsedPrice) && parsedPrice > 20 && parsedPrice < 200) {
             setFuelPriceTL(parsedPrice);
             setSource("live");
-            setLastUpdated(formatTimestamp());
+            setLastUpdated(formatDate());
             setIsLoading(false);
             return;
           }
@@ -89,16 +84,16 @@ export function useFuelPrice(): UseFuelPriceResult {
       console.warn("Corsproxy fetch failed:", e);
     }
 
-    // Fallback: Latest verified triprentacar.com.tr price
+    // Fallback: Latest verified price
     setFuelPriceTL(61.12);
     setSource("cached");
-    setLastUpdated("05.08.2026 13:28 (Resmi Güncel)");
+    setLastUpdated("05.08.2026");
     setIsLoading(false);
   }, []);
 
   useEffect(() => {
     fetchLiveFuelPrice();
-    // Her 24 saatte bir otomatik günlük kontrol
+    // Otomatik günlük kontrol (her 24 saatte bir)
     const interval = setInterval(fetchLiveFuelPrice, 24 * 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, [fetchLiveFuelPrice]);

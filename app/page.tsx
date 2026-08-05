@@ -179,15 +179,6 @@ export default function Home() {
               <span className="text-xs font-semibold text-slate-700">KKTC Benzin:</span>
               <span className="font-bold text-emerald-800">{fuelPriceTL.toFixed(2)} TL/L</span>
               <span className="text-[10px] text-emerald-600 font-medium">· Güncelleme: {fuelLastUpdated}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5 text-emerald-600 hover:text-emerald-800 ml-0.5"
-                onClick={refreshFuelPrice}
-                title="Günlük Akaryakıt Fiyatını Kontrol Et"
-              >
-                <RefreshCw className="h-3 w-3" />
-              </Button>
             </div>
             <div className="flex items-center gap-1.5">
               <Route className="h-4 w-4 text-slate-400" />
