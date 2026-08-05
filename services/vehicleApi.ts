@@ -235,25 +235,56 @@ export async function fetchEnginesOnline(
 
 function buildFallbackEngines(make: string, model: string): EngineOption[] {
   const full = `${make} ${model}`.toLowerCase();
-  const isElectric = ["tesla", "ioniq 5", "ioniq 6", "ev6", "id.3", "id.4", "e-tron", "ariya", "leaf", "model"].some(k => full.includes(k));
-  const isHybrid   = ["prius", "yaris hybrid", "yaris cross", "jazz", "zoe", "niro hybrid", "tucson hybrid"].some(k => full.includes(k));
+  
+  // Elektrikli ve Hibrit Özel Durumları
+  const isElectric = ["tesla", "ioniq 5", "ioniq 6", "ev6", "id.3", "id.4", "e-tron", "ariya", "leaf", "model", "taycan", "eq"].some(k => full.includes(k));
+  const isHybrid   = ["prius", "yaris hybrid", "yaris cross", "jazz", "zoe", "niro hybrid", "tucson hybrid", "e:hev", "phev"].some(k => full.includes(k));
 
   if (isElectric) return [
-    { cc: 0, fuelType: "Elektrik", trim: "", weightKg: 1850, fuelConsumption: 0, label: "Elektrik Motoru" },
+    { cc: 0, fuelType: "Elektrik", trim: "", weightKg: 1950, fuelConsumption: 0, label: "Elektrik Motoru (EV)" },
   ];
   if (isHybrid) return [
     { cc: 1500, fuelType: "Hibrit", trim: "", weightKg: 1380, fuelConsumption: 4.8, label: "1500 cc – Hibrit" },
-    { cc: 1800, fuelType: "Hibrit", trim: "", weightKg: 1450, fuelConsumption: 5.5, label: "1800 cc – Hibrit" },
+    { cc: 1800, fuelType: "Hibrit", trim: "", weightKg: 1450, fuelConsumption: 5.2, label: "1800 cc – Hibrit" },
+    { cc: 2000, fuelType: "Hibrit", trim: "", weightKg: 1600, fuelConsumption: 5.5, label: "2000 cc – Hibrit" },
   ];
 
+  // Lüks / Spor / Büyük SUV
+  const isLargeLuxury = ["bmw", "mercedes", "audi", "lexus", "land rover", "porsche", "volvo", "jaguar", "ferrari", "bentley", "maserati"].some(k => full.includes(k));
+  // Kompakt / Küçük
+  const isSmall = ["picanto", "i10", "i20", "fiesta", "corsa", "clio", "polo", "yaris", "swift", "micra", "500", "aygo"].some(k => full.includes(k));
+
+  if (isLargeLuxury) {
+    return [
+      { cc: 1600, fuelType: "Benzin", trim: "", weightKg: 1550, fuelConsumption: 7.5, label: "1600 cc – Benzin" },
+      { cc: 2000, fuelType: "Benzin", trim: "", weightKg: 1650, fuelConsumption: 8.5, label: "2000 cc – Benzin" },
+      { cc: 3000, fuelType: "Benzin", trim: "", weightKg: 1850, fuelConsumption: 10.5, label: "3000 cc – Benzin" },
+      { cc: 2000, fuelType: "Dizel",  trim: "", weightKg: 1700, fuelConsumption: 6.5, label: "2000 cc – Dizel" },
+      { cc: 3000, fuelType: "Dizel",  trim: "", weightKg: 1900, fuelConsumption: 7.5, label: "3000 cc – Dizel" },
+      { cc: 2000, fuelType: "Hibrit", trim: "", weightKg: 1800, fuelConsumption: 5.5, label: "2000 cc – Hibrit" },
+    ];
+  }
+
+  if (isSmall) {
+    return [
+      { cc: 1000, fuelType: "Benzin", trim: "", weightKg: 1050, fuelConsumption: 5.0, label: "1000 cc – Benzin" },
+      { cc: 1200, fuelType: "Benzin", trim: "", weightKg: 1100, fuelConsumption: 5.5, label: "1200 cc – Benzin" },
+      { cc: 1400, fuelType: "Benzin", trim: "", weightKg: 1150, fuelConsumption: 6.0, label: "1400 cc – Benzin" },
+      { cc: 1500, fuelType: "Dizel",  trim: "", weightKg: 1200, fuelConsumption: 4.5, label: "1500 cc – Dizel" },
+    ];
+  }
+
+  // Standart Araçlar (Toyota Corolla, VW Golf, Ford Focus vb.)
   return [
-    { cc: 1000, fuelType: "Benzin", trim: "", weightKg: 1100, fuelConsumption: 5.5, label: "1000 cc – Benzin" },
-    { cc: 1200, fuelType: "Benzin", trim: "", weightKg: 1150, fuelConsumption: 6.0, label: "1200 cc – Benzin" },
-    { cc: 1400, fuelType: "Benzin", trim: "", weightKg: 1250, fuelConsumption: 6.5, label: "1400 cc – Benzin" },
+    { cc: 1200, fuelType: "Benzin", trim: "", weightKg: 1250, fuelConsumption: 6.0, label: "1200 cc – Benzin" },
+    { cc: 1400, fuelType: "Benzin", trim: "", weightKg: 1300, fuelConsumption: 6.5, label: "1400 cc – Benzin" },
+    { cc: 1500, fuelType: "Benzin", trim: "", weightKg: 1350, fuelConsumption: 6.8, label: "1500 cc – Benzin" },
     { cc: 1600, fuelType: "Benzin", trim: "", weightKg: 1350, fuelConsumption: 7.0, label: "1600 cc – Benzin" },
     { cc: 2000, fuelType: "Benzin", trim: "", weightKg: 1450, fuelConsumption: 8.0, label: "2000 cc – Benzin" },
-    { cc: 1500, fuelType: "Dizel",  trim: "", weightKg: 1300, fuelConsumption: 5.0, label: "1500 cc – Dizel" },
-    { cc: 2000, fuelType: "Dizel",  trim: "", weightKg: 1500, fuelConsumption: 5.5, label: "2000 cc – Dizel" },
+    { cc: 1500, fuelType: "Dizel",  trim: "", weightKg: 1350, fuelConsumption: 5.0, label: "1500 cc – Dizel" },
+    { cc: 1600, fuelType: "Dizel",  trim: "", weightKg: 1400, fuelConsumption: 5.2, label: "1600 cc – Dizel" },
+    { cc: 2000, fuelType: "Dizel",  trim: "", weightKg: 1500, fuelConsumption: 5.8, label: "2000 cc – Dizel" },
+    { cc: 1800, fuelType: "Hibrit", trim: "", weightKg: 1400, fuelConsumption: 5.0, label: "1800 cc – Hibrit" },
   ];
 }
 
