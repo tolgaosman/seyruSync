@@ -56,8 +56,12 @@ export default function Home() {
     refresh: refreshRate,
   } = useExchangeRate();
 
-  // Resmi KKTC Benzin TL/L Fiyatı (61.12 TL/L)
-  const { fuelPriceTL: liveFuelPriceTL } = useFuelPrice();
+  // Canlı & Günlük Otomatik KKTC Benzin TL/L Fiyatı
+  const {
+    fuelPriceTL: liveFuelPriceTL,
+    lastUpdated: fuelLastUpdated,
+    refresh: refreshFuelPrice,
+  } = useFuelPrice();
 
   const [fuelPriceTL, setFuelPriceTL] = useState<number>(DEFAULT_FUEL_PRICE_TL);
 
@@ -170,11 +174,20 @@ export default function Home() {
 
           {/* TCO Parametreleri (masaüstü) */}
           <div className="hidden lg:flex items-center gap-4 text-sm text-slate-500">
-            <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1 text-xs">
+            <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1 text-xs">
               <Fuel className="h-4 w-4 text-emerald-600" />
               <span className="text-xs font-semibold text-slate-700">KKTC Benzin:</span>
-              <span className="font-bold text-slate-800">{fuelPriceTL.toFixed(2)} TL/L</span>
-              <span className="text-[10px] text-slate-400 font-medium">(Resmi Sabit)</span>
+              <span className="font-bold text-emerald-800">{fuelPriceTL.toFixed(2)} TL/L</span>
+              <span className="text-[10px] text-emerald-600 font-medium">· Güncelleme: {fuelLastUpdated}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5 text-emerald-600 hover:text-emerald-800 ml-0.5"
+                onClick={refreshFuelPrice}
+                title="Günlük Akaryakıt Fiyatını Kontrol Et"
+              >
+                <RefreshCw className="h-3 w-3" />
+              </Button>
             </div>
             <div className="flex items-center gap-1.5">
               <Route className="h-4 w-4 text-slate-400" />
@@ -311,7 +324,7 @@ export default function Home() {
                 <div className="space-y-1">
                   <label className="text-xs text-slate-500 font-medium flex items-center justify-between">
                     <span>KKTC Benzin Fiyatı (TL/litre)</span>
-                    <span className="text-[10px] text-emerald-600 font-semibold">(Resmi Sabit)</span>
+                    <span className="text-[10px] text-emerald-600 font-semibold">Güncelleme: {fuelLastUpdated}</span>
                   </label>
                   <Input
                     type="number"
