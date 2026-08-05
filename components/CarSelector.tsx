@@ -88,12 +88,6 @@ export function CarSelector({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50/70 border border-blue-200 text-xs text-blue-800">
-        <div className="flex items-center gap-1.5 font-medium">
-          <Globe className="h-4 w-4 text-blue-600 animate-pulse" />
-          <span>Canlı İnternet Sorgusu (Sıfır Sabit Veritabanı)</span>
-        </div>
-      </div>
 
       {Array.from({ length: maxSlots }).map((_, idx) => {
         const selected = selectedCars[idx] ?? null;

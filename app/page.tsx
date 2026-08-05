@@ -110,9 +110,9 @@ export default function Home() {
 
   const fetchedDate = fetchedAt
     ? new Date(fetchedAt).toLocaleTimeString("tr-TR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     : null;
 
   return (
@@ -127,7 +127,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                AutoBarem
+                AutoCalc
                 <span className="ml-2 text-blue-600">KKTC</span>
               </h1>
               <p className="text-xs text-slate-400 leading-none">
@@ -157,8 +157,8 @@ export default function Home() {
                 {rateSource === "live"
                   ? `Canlı ${fetchedDate ?? ""}`
                   : rateSource === "fallback"
-                  ? "Yedek kur"
-                  : "Yükleniyor"}
+                    ? "Yedek kur"
+                    : "Yükleniyor"}
               </span>
             </div>
             <Button
@@ -230,22 +230,20 @@ export default function Home() {
             <div className="flex bg-slate-100 rounded-xl p-1">
               <button
                 onClick={() => setLeftTab("database")}
-                className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                  leftTab === "database"
+                className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${leftTab === "database"
                     ? "bg-white text-slate-800 shadow-sm"
                     : "text-slate-500 hover:text-slate-700"
-                }`}
+                  }`}
               >
                 <BookOpen className="h-4 w-4" />
                 Araç Veritabanı
               </button>
               <button
                 onClick={() => setLeftTab("custom")}
-                className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                  leftTab === "custom"
+                className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${leftTab === "custom"
                     ? "bg-white text-slate-800 shadow-sm"
                     : "text-slate-500 hover:text-slate-700"
-                }`}
+                  }`}
               >
                 <PenLine className="h-4 w-4" />
                 Özel Araç
