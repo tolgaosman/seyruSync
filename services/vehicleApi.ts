@@ -52,7 +52,7 @@ const FALLBACK_MODELS: Record<string, string[]> = {
   "Peugeot":        ["108", "208", "308", "508", "2008", "3008", "5008", "e-208", "e-2008"],
   "Renault":        ["Clio", "Megane", "Kadjar", "Captur", "Zoe", "Arkana", "Austral", "Scenic"],
   "Suzuki":         ["Swift", "Vitara", "SX4 S-Cross", "Ignis", "Jimny", "Swace"],
-  "Mazda":          ["Mazda2", "Mazda3", "Mazda6", "CX-3", "CX-5", "CX-30", "MX-5", "CX-60"],
+  "Mazda":          ["Mazda2", "Demio", "Mazda3", "Mazda6", "CX-3", "CX-5", "CX-30", "MX-5", "CX-60"],
   "Volvo":          ["XC40", "XC60", "XC90", "S60", "S90", "V60", "V90", "C40"],
   "Tesla":          ["Model 3", "Model S", "Model X", "Model Y", "Cybertruck"],
   "Skoda":          ["Fabia", "Scala", "Octavia", "Superb", "Kamiq", "Karoq", "Kodiaq", "Enyaq"],
@@ -277,7 +277,7 @@ function buildFallbackEngines(make: string, model: string): EngineOption[] {
   // Çok Hafif / A Segmenti
   const isUltraLight = ["swift", "picanto", "i10", "aygo", "c1", "108"].some(k => full.includes(k));
   // Kompakt / Küçük
-  const isSmall = ["i20", "fiesta", "corsa", "clio", "polo", "yaris", "micra", "500", "sandero"].some(k => full.includes(k));
+  const isSmall = ["i20", "fiesta", "corsa", "clio", "polo", "yaris", "micra", "500", "sandero", "demio"].some(k => full.includes(k));
 
   if (isLargeLuxury) {
     return [
