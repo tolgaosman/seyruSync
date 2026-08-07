@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: isProd ? "/seyruSync/docs" : "",
+  basePath: isProd ? "/autoCalc/docs" : "",
 };
 
 export default nextConfig;
