@@ -4,22 +4,27 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-[10px] text-sm font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-base disabled:pointer-events-none disabled:opacity-45",
   {
     variants: {
       variant: {
-        default: "bg-blue-600 text-white hover:bg-blue-700",
-        destructive: "bg-red-500 text-white hover:bg-red-600",
+        default:
+          "bg-accent/90 text-white shadow-[var(--t-button-shadow)] hover:bg-accent active:scale-[0.98]",
+        destructive:
+          "bg-danger/15 border border-danger/35 text-danger hover:bg-danger/25",
         outline:
-          "border border-slate-300 bg-white hover:bg-slate-50 text-slate-700",
-        secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200",
-        ghost: "hover:bg-slate-100 text-slate-700",
-        link: "text-blue-600 underline-offset-4 hover:underline",
+          "border border-line bg-fill text-ink-2 hover:bg-fill-2 hover:text-ink hover:border-line-strong",
+        secondary:
+          "bg-elevated text-ink hover:bg-fill-3 border border-line",
+        subtle:
+          "bg-fill-2 text-ink-2 hover:bg-fill-3 hover:text-ink",
+        ghost: "text-ink-3 hover:bg-fill-2 hover:text-ink",
+        link: "text-accent-2 underline-offset-4 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-lg px-8",
+        sm: "h-8 rounded-lg px-3 text-xs",
+        lg: "h-11 rounded-xl px-8",
         icon: "h-9 w-9",
       },
     },

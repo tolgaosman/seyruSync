@@ -2,7 +2,9 @@
 
 import { Car } from "@/types";
 import { calculateRoadTax, formatTL } from "@/utils/taxCalculator";
-import { TrendingDown, TrendingUp, Minus } from "lucide-react";
+import { TrendingDown, TrendingUp, Minus, Lightbulb } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface BaselineSummaryProps {
   cars: Car[];
@@ -13,60 +15,86 @@ export function BaselineSummary({ cars }: BaselineSummaryProps) {
   if (cars.length < 2) return null;
 
   const baselineCar = cars[0];
-  const baselineTax = calculateRoadTax(baselineCar.weightKg, baselineCar.year).annualTax;
+  const baselineTax = calculateRoadTax(
+    baselineCar.weightKg,
+    baselineCar.year
+  ).annualTax;
 
   const targetCars = cars.slice(1);
 
   return (
-    <div className="bg-white border border-blue-100 rounded-xl p-5 shadow-sm space-y-4 relative overflow-hidden">
-      {/* Dekoratif arka plan */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+    <Card className="animate-fade-up relative overflow-hidden p-5">
+      {/* Dekoratif ışıma */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-accent/20 blur-3xl"
+      />
 
-      <div>
-        <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-          💡 Karşılaştırma Özeti
+      <div className="relative">
+        <h3 className="flex items-center gap-2 text-sm font-bold text-ink">
+          <Lightbulb className="h-4 w-4 text-warn" />
+          Karşılaştırma Özeti
         </h3>
-        <p className="text-xs text-slate-500 mt-1">
-          <span className="font-semibold text-slate-700">Mevcut Aracınız ({baselineCar.brand}):</span> Yıllık {formatTL(baselineTax)} seyrüsefer vergisi.
+        <p className="mt-1.5 text-xs text-ink-3">
+          <span className="font-semibold text-ink-2">
+            Mevcut Aracınız ({baselineCar.brand}):
+          </span>{" "}
+          Yıllık <span className="tnum">{formatTL(baselineTax)}</span> seyrüsefer
+          vergisi.
         </p>
       </div>
 
-      <div className="space-y-2">
+      <div className="relative mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         {targetCars.map((target, idx) => {
-          const targetTax = calculateRoadTax(target.weightKg, target.year).annualTax;
+          const targetTax = calculateRoadTax(
+            target.weightKg,
+            target.year
+          ).annualTax;
           const diff = targetTax - baselineTax;
-          
-          let colorClass = "text-slate-600 bg-slate-50 border-slate-200";
+
+          let tone = "text-ink-2 bg-fill border-line";
           let Icon = Minus;
           let message = "Seyrüsefer yükünüz değişmeyecek.";
+          let amount: string | null = null;
 
           if (diff > 0) {
-            colorClass = "text-red-700 bg-red-50 border-red-200";
+            tone = "text-danger bg-danger/10 border-danger/25";
             Icon = TrendingUp;
-            message = `Geçiş yaparsanız yıllık seyrüsefer yükünüz ${formatTL(diff)} artacak.`;
+            message = "Geçiş yaparsanız yıllık seyrüsefer yükünüz artacak.";
+            amount = `+${formatTL(diff)}`;
           } else if (diff < 0) {
-            colorClass = "text-emerald-700 bg-emerald-50 border-emerald-200";
+            tone = "text-success bg-success/10 border-success/25";
             Icon = TrendingDown;
-            message = `Geçiş yaparsanız yıllık seyrüsefer yükünüz ${formatTL(Math.abs(diff))} azalacak.`;
+            message = "Geçiş yaparsanız yıllık seyrüsefer yükünüz azalacak.";
+            amount = `−${formatTL(Math.abs(diff))}`;
           }
 
           return (
-            <div key={target.id || idx} className={`flex items-center gap-3 p-3 rounded-lg border ${colorClass}`}>
-              <div className="shrink-0 p-1.5 rounded-md bg-white shadow-sm">
+            <div
+              key={target.id || idx}
+              className={cn(
+                "flex items-center gap-3 rounded-xl border p-3.5",
+                tone
+              )}
+            >
+              <div className="shrink-0 rounded-lg border border-current/20 bg-current/10 p-2">
                 <Icon className="h-4 w-4" />
               </div>
-              <div>
-                <p className="text-xs font-semibold">
-                  {target.brand} {target.model} Hedefi
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold">
+                  {target.brand} {target.model}
                 </p>
-                <p className="text-[11px] font-medium opacity-90 mt-0.5">
-                  {message}
-                </p>
+                <p className="mt-0.5 text-[11px] opacity-80">{message}</p>
               </div>
+              {amount && (
+                <span className="tnum shrink-0 text-base font-bold">
+                  {amount}
+                </span>
+              )}
             </div>
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 }

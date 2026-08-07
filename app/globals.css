@@ -1,12 +1,177 @@
-/* Google Fonts — must be first */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
-
 @import "tailwindcss";
 
-:root {
-  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
+/* ============================================================
+   Design tokens
+
+   @theme sadece dolaylama yapar: her token bir --t-* değişkenine
+   bakar. Gerçek değerler aşağıdaki iki palette yaşar, böylece tek
+   bir `data-theme` attribute'u tüm arayüzü çevirir.
+   ============================================================ */
+@theme {
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  /* Zemin katmanları */
+  --color-base: var(--t-base);
+  --color-surface: var(--t-surface);
+  --color-elevated: var(--t-elevated);
+
+  /* Yüzey dolguları — koyuda beyaz, aydınlıkta lacivert tint */
+  --color-fill: var(--t-fill);
+  --color-fill-2: var(--t-fill-2);
+  --color-fill-3: var(--t-fill-3);
+
+  /* Kenarlıklar */
+  --color-line: var(--t-line);
+  --color-line-strong: var(--t-line-strong);
+
+  /* Metin hiyerarşisi */
+  --color-ink: var(--t-ink);
+  --color-ink-2: var(--t-ink-2);
+  --color-ink-3: var(--t-ink-3);
+
+  /* Aksan — pastel, düşük doygunluk */
+  --color-accent: var(--t-accent);
+  --color-accent-2: var(--t-accent-2);
+
+  /* Semantik */
+  --color-success: var(--t-success);
+  --color-warn: var(--t-warn);
+  --color-danger: var(--t-danger);
+  --color-info: var(--t-info);
+
+  /* Barem (1 = en iyi → 4 = en kötü) */
+  --color-barem1: var(--t-barem1);
+  --color-barem2: var(--t-barem2);
+  --color-barem3: var(--t-barem3);
+  --color-barem4: var(--t-barem4);
+
+  /* Yakıt türleri */
+  --color-fuel-electric: var(--t-fuel-electric);
+  --color-fuel-hybrid: var(--t-fuel-hybrid);
+  --color-fuel-diesel: var(--t-fuel-diesel);
+  --color-fuel-petrol: var(--t-fuel-petrol);
+
+  /* Yarıçap */
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+
+  /* Animasyonlar — sadece opacity/transform, hepsi composited */
+  --animate-pop-in: pop-in 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-pop-out: pop-out 0.1s ease-in;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
 }
 
+/* ============================================================
+   AYDINLIK PALET (varsayılan) — pastel, kırık beyaz zemin
+   ============================================================ */
+:root {
+  color-scheme: light;
+
+  --t-base: #f3f4f8;
+  --t-surface: #ffffff;
+  --t-elevated: #eceef4;
+
+  --t-fill: rgba(38, 46, 70, 0.035);
+  --t-fill-2: rgba(38, 46, 70, 0.062);
+  --t-fill-3: rgba(38, 46, 70, 0.09);
+
+  --t-line: rgba(38, 46, 70, 0.11);
+  --t-line-strong: rgba(38, 46, 70, 0.19);
+
+  --t-ink: #2c3340;
+  --t-ink-2: #5b6474;
+  --t-ink-3: #858e9e;
+
+  --t-accent: #6f78bd;
+  --t-accent-2: #4f8b9b;
+
+  --t-success: #4f9b78;
+  --t-warn: #b5893c;
+  --t-danger: #bb6a6a;
+  --t-info: #5f8fbb;
+
+  --t-barem1: #4f9b78;
+  --t-barem2: #b5893c;
+  --t-barem3: #b3714c;
+  --t-barem4: #bb6a6a;
+
+  --t-fuel-electric: #4f8b9b;
+  --t-fuel-hybrid: #7d72ab;
+  --t-fuel-diesel: #b5893c;
+  --t-fuel-petrol: #737c8c;
+
+  /* Cam ve dekoratif katmanlar */
+  --t-glass-bg: rgba(255, 255, 255, 0.72);
+  --t-glass-highlight: rgba(255, 255, 255, 0.9);
+  --t-glass-shadow: 0 14px 30px -22px rgba(30, 38, 60, 0.45);
+  --t-skeleton-bg: rgba(38, 46, 70, 0.07);
+  --t-skeleton-sheen: rgba(255, 255, 255, 0.75);
+  --t-scrollbar: rgba(38, 46, 70, 0.18);
+  --t-scrollbar-hover: rgba(38, 46, 70, 0.3);
+  --t-mesh-1: rgba(111, 120, 189, 0.1);
+  --t-mesh-2: rgba(79, 139, 155, 0.08);
+  --t-selection: rgba(111, 120, 189, 0.24);
+  --t-popover-shadow: 0 18px 40px -18px rgba(30, 38, 60, 0.35);
+  --t-button-shadow: 0 4px 12px -8px rgba(30, 38, 60, 0.5);
+}
+
+/* ============================================================
+   KOYU PALET
+   ============================================================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --t-base: #161a23;
+  --t-surface: #1d222d;
+  --t-elevated: #262c39;
+
+  --t-fill: rgba(255, 255, 255, 0.035);
+  --t-fill-2: rgba(255, 255, 255, 0.07);
+  --t-fill-3: rgba(255, 255, 255, 0.1);
+
+  --t-line: rgba(255, 255, 255, 0.07);
+  --t-line-strong: rgba(255, 255, 255, 0.13);
+
+  --t-ink: #dde2ea;
+  --t-ink-2: #9aa3b2;
+  --t-ink-3: #6f7889;
+
+  --t-accent: #8189c9;
+  --t-accent-2: #74aebb;
+
+  --t-success: #79b394;
+  --t-warn: #d3b075;
+  --t-danger: #cc8585;
+  --t-info: #7ba4c8;
+
+  --t-barem1: #79b394;
+  --t-barem2: #d3b075;
+  --t-barem3: #cc9573;
+  --t-barem4: #cc8585;
+
+  --t-fuel-electric: #74aebb;
+  --t-fuel-hybrid: #9b91c4;
+  --t-fuel-diesel: #d3b075;
+  --t-fuel-petrol: #8d95a4;
+
+  --t-glass-bg: rgba(255, 255, 255, 0.035);
+  --t-glass-highlight: rgba(255, 255, 255, 0.03);
+  --t-glass-shadow: 0 18px 36px -24px rgba(0, 0, 0, 0.5);
+  --t-skeleton-bg: rgba(255, 255, 255, 0.05);
+  --t-skeleton-sheen: rgba(255, 255, 255, 0.08);
+  --t-scrollbar: rgba(255, 255, 255, 0.1);
+  --t-scrollbar-hover: rgba(255, 255, 255, 0.18);
+  --t-mesh-1: rgba(129, 137, 201, 0.09);
+  --t-mesh-2: rgba(116, 174, 187, 0.06);
+  --t-selection: rgba(129, 137, 201, 0.3);
+  --t-popover-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.75);
+  --t-button-shadow: 0 6px 18px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
 *,
 *::before,
 *::after {
@@ -14,41 +179,191 @@
 }
 
 html {
-  font-family: var(--font-inter);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--color-base);
+  color: var(--color-ink);
   min-height: 100vh;
+  position: relative;
 }
 
-/* Custom scrollbar */
+/* Sabit renk mesh'i — statik gradient, filtre yok, bedeli ~sıfır */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 15% 0%, var(--t-mesh-1), transparent 70%),
+    radial-gradient(50% 40% at 85% 8%, var(--t-mesh-2), transparent 70%);
+}
+
+::selection {
+  background: var(--t-selection);
+  color: var(--color-ink);
+}
+
+/* ============================================================
+   Yardımcı sınıflar
+
+   Hepsi @layer components içinde: katmansız yazılırsa Tailwind
+   utility'lerini (utilities katmanı) ezerler ve kart üzerindeki
+   ring, shadow, border override'ları sessizce çalışmaz.
+   ============================================================ */
+@layer components {
+
+/* Cam yüzey — backdrop-filter pahalı olduğu için sadece
+   header, slot kartları, KPI kartları ve tooltip'te kullanılır. */
+.glass {
+  /* Mat: gradient parlaması yok, düz yarı saydam yüzey */
+  background: var(--t-glass-bg);
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(18px) saturate(105%);
+  -webkit-backdrop-filter: blur(18px) saturate(105%);
+  box-shadow:
+    inset 0 1px 0 var(--t-glass-highlight),
+    var(--t-glass-shadow);
+}
+
+/* Blur'suz varyant — uzun listeler, tablo satırları, iç yüzeyler */
+.glass-soft {
+  background: var(--color-fill);
+  border: 1px solid var(--color-line);
+}
+
+/* Rakamların zıplamaması için sabit genişlikli rakamlar */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Yükleniyor iskeleti */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--t-skeleton-bg);
+  border-radius: var(--radius-control);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--t-skeleton-sheen),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+/* Kademeli giriş animasyonu: style={{ "--d": "80ms" }} ile gecikme verilir */
+.animate-fade-up {
+  opacity: 0;
+  animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--d, 0ms);
+}
+
+.animate-fade-in {
+  opacity: 0;
+  animation: fade-in 0.4s ease-out forwards;
+  animation-delay: var(--d, 0ms);
+}
+
+} /* @layer components */
+
+/* ============================================================
+   Keyframes
+   ============================================================ */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+}
+
+@keyframes pop-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Radix Select animasyonu, `animate-pop-in` / `animate-pop-out` utility'leri
+   olarak @theme'den üretiliyor (tailwindcss-animate kurulu değil). */
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--color-surface);
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: var(--t-scrollbar);
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--t-scrollbar-hover);
 }
 
-/* Smooth transitions */
-* {
-  transition-property: color, background-color, border-color;
-  transition-duration: 150ms;
-  transition-timing-function: ease;
-}
-
-/* Remove spinner from number inputs */
+/* ============================================================
+   Number input spinner'larını kaldır
+   ============================================================ */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -56,4 +371,27 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 input[type="number"] {
   -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ============================================================
+   Erişilebilirlik — hareket azaltma
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-fade-up,
+  .animate-fade-in {
+    opacity: 1;
+  }
+  /* Shimmer ve nabız tamamen kapansın — sadece hızlanması yetmez */
+  .skeleton::after {
+    display: none;
+  }
 }

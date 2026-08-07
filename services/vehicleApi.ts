@@ -1,5 +1,6 @@
 import { Car } from "@/types";
 import localCarsData from "@/data/kktc_popular_cars.json";
+import { apiGet } from "@/lib/api";
 
 /**
  * Dinamik İnternet Araç Arama Servisi
@@ -127,9 +128,15 @@ const BASE = "https://www.carqueryapi.com/api/0.3/";
 // Cast local JSON data
 const LOCAL_CARS = localCarsData as Record<string, Record<string, Record<string, EngineOption[]>>>;
 
-/** Markaları çek (Lokal JSON + API Birleşimi) */
+/** Markaları çek (Lokal JSON + Backend + CarQuery Birleşimi) */
 export async function fetchMakesOnline(): Promise<string[]> {
   const localMakes = Object.keys(LOCAL_CARS);
+
+  // Tier 0: kendi backend'imiz — CORS proxy'lerine hiç gitmeden döner.
+  const backend = await apiGet<{ makes: string[] }>("/api/vehicles/makes", 6000);
+  if (backend?.makes?.length) {
+    return Array.from(new Set([...localMakes, ...backend.makes])).sort();
+  }
 
   try {
     const text = await carQueryFetch(`${BASE}?cmd=getMakes`);
@@ -146,11 +153,19 @@ export async function fetchMakesOnline(): Promise<string[]> {
   return Array.from(new Set([...localMakes, ...POPULAR_MAKES])).sort();
 }
 
-/** Marka seçilince modelleri çek (Lokal JSON + API Birleşimi) */
+/** Marka seçilince modelleri çek (Lokal JSON + Backend + API Birleşimi) */
 export async function fetchModelsOnline(make: string): Promise<string[]> {
   // Try exact match or case-insensitive match for local models
   const makeKey = Object.keys(LOCAL_CARS).find(k => k.toLowerCase() === make.toLowerCase());
   const localModels = makeKey ? Object.keys(LOCAL_CARS[makeKey]) : [];
+
+  const backend = await apiGet<{ models: string[] }>(
+    `/api/vehicles/models?make=${encodeURIComponent(make)}`,
+    6000
+  );
+  if (backend?.models?.length) {
+    return Array.from(new Set([...localModels, ...backend.models])).sort();
+  }
 
   try {
     const url = `${BASE}?cmd=getModels&make=${encodeURIComponent(make.toLowerCase())}`;
@@ -180,6 +195,12 @@ export async function fetchYearsOnline(make: string, model: string): Promise<num
       if (years.length > 0) return years;
     }
   }
+
+  const backend = await apiGet<{ years: number[] }>(
+    `/api/vehicles/years?make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`,
+    6000
+  );
+  if (backend?.years?.length) return backend.years;
 
   try {
     const url = `${BASE}?cmd=getTrims&make=${encodeURIComponent(make.toLowerCase())}&model=${encodeURIComponent(model.toLowerCase())}`;
@@ -228,6 +249,9 @@ export interface EngineOption {
   weightKg: number;
   fuelConsumption: number;
   label: string;
+  /** Backend'den geldiyse dolu — bkz. buildCar(). "baseline" gerçek fiyat değildir. */
+  priceGBP?: number;
+  priceConfidence?: "manual" | "listing" | "baseline";
 }
 
 /** Yıl seçilince motor seçeneklerini çek (Önce Lokal JSON, sonra API) */
@@ -244,6 +268,12 @@ export async function fetchEnginesOnline(
       if (engineOpts && engineOpts.length > 0) return engineOpts;
     }
   }
+
+  const backend = await apiGet<{ engines: EngineOption[] }>(
+    `/api/vehicles/engines?make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}&year=${year}`,
+    8000
+  );
+  if (backend?.engines?.length) return backend.engines;
 
   try {
     const url = `${BASE}?cmd=getTrims&make=${encodeURIComponent(make.toLowerCase())}&model=${encodeURIComponent(model.toLowerCase())}&year=${year}`;
@@ -375,7 +405,10 @@ export function buildCar(make: string, model: string, year: number, engine: Engi
     model,
     year,
     weightKg: engine.weightKg,
-    priceGBP: estimatePriceGBP(make, model, year, engine.cc, engine.fuelType),
+    // Backend fiyatı verdiyse (gerçek olsun ya da "baseline" tahmini olsun) onu kullan;
+    // backend hiç ulaşılamadıysa çevrimdışı sezgisel tahmine düş. buildCar senkron
+    // kalmalı — CarSelector.onCalculate zaten bunu await etmiyor.
+    priceGBP: engine.priceGBP ?? estimatePriceGBP(make, model, year, engine.cc, engine.fuelType),
     avgFuelConsumption: engine.fuelConsumption,
     fuelType: engine.fuelType,
     engineCC: engine.cc,

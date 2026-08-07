@@ -19,12 +19,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { X, RefreshCw, Calculator, AlertCircle } from "lucide-react";
+import {
+  X,
+  RefreshCw,
+  Calculator,
+  AlertCircle,
+  Star,
+  Plus,
+  Gauge,
+  Weight,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { calculateRoadTax } from "@/utils/taxCalculator";
+import { calculateRoadTax, formatTL } from "@/utils/taxCalculator";
+import { cn } from "@/lib/utils";
 
 interface CarSelectorProps {
-  selectedCars: Car[];
+  /** Slot sırasıyla hizalı dizi — boş slotlar null */
+  selectedCars: (Car | null)[];
   onSelect: (car: Car | null, index: number) => void;
   maxSlots?: number;
 }
@@ -60,6 +71,8 @@ const emptySlot = (): SlotState => ({
   errors: {},
 });
 
+const SLOT_LABELS = ["Mevcut Aracınız", "Karşılaştırma 1", "Karşılaştırma 2"];
+
 export function CarSelector({
   selectedCars,
   onSelect,
@@ -68,6 +81,10 @@ export function CarSelector({
   const [makes, setMakes] = useState<string[]>(POPULAR_MAKES);
   const [slots, setSlots] = useState<SlotState[]>(
     Array.from({ length: maxSlots }, emptySlot)
+  );
+  /** Mobilde 2. ve 3. slot varsayılan olarak kapalı durur */
+  const [expanded, setExpanded] = useState<boolean[]>(
+    Array.from({ length: maxSlots }, (_, i) => i === 0)
   );
 
   useEffect(() => {
@@ -172,7 +189,7 @@ export function CarSelector({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
       {Array.from({ length: maxSlots }).map((_, idx) => {
         const selected = selectedCars[idx] ?? null;
         const s = slots[idx];
@@ -180,44 +197,99 @@ export function CarSelector({
           ? calculateRoadTax(selected.weightKg, selected.year, selected.fuelType)
           : null;
 
+        const isBaseline = idx === 0;
+        const isBusy = s.loadingModels || s.loadingYears || s.loadingEngines;
+        const isOpen = expanded[idx] || !!selected;
+
+        // Kaç adım tamamlandı (ilerleme çubuğu için)
+        const steps = [!!s.make, !!s.model, !!s.year, !!s.engine];
+        const doneSteps = selected ? 4 : steps.filter(Boolean).length;
+
         return (
           <div
             key={idx}
-            className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden"
+            className={cn(
+              "glass animate-fade-up flex flex-col rounded-2xl transition-[box-shadow,border-color] duration-300",
+              isBaseline && "ring-1 ring-accent/35"
+            )}
+            style={{ "--d": `${idx * 70}ms` } as React.CSSProperties}
           >
-            {/* Header */}
-            <div className={`flex items-center justify-between px-4 py-2.5 border-b border-slate-200 ${idx === 0 ? "bg-blue-50/50" : "bg-slate-50"}`}>
-              <span className={`text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 ${idx === 0 ? "text-blue-600" : "text-slate-500"}`}>
-                Araç {idx + 1}
+            {/* ── Başlık ── */}
+            <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
+              <span
+                className={cn(
+                  "flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider",
+                  isBaseline ? "text-accent-2" : "text-ink-3"
+                )}
+              >
+                {isBaseline && <Star className="h-3 w-3 fill-current" />}
+                {SLOT_LABELS[idx] ?? `Araç ${idx + 1}`}
               </span>
-              {selected && (
+
+              {selected ? (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onClear(idx)}
-                  className="h-6 text-xs text-slate-400 hover:text-red-500 px-2 gap-1"
+                  className="h-7 gap-1 px-2 text-xs hover:text-danger"
                 >
                   <X className="h-3 w-3" /> Temizle
                 </Button>
+              ) : (
+                <span className="tnum text-[11px] font-medium text-ink-3">
+                  {doneSteps}/4
+                </span>
               )}
             </div>
 
-            {/* Body */}
-            <div className="p-3.5">
+            {/* ── İlerleme rayı ── */}
+            <div className="flex gap-1 px-4 pt-3">
+              {steps.map((done, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "h-0.5 flex-1 rounded-full transition-colors duration-300",
+                    i < doneSteps ? "bg-accent/70" : "bg-fill-3"
+                  )}
+                />
+              ))}
+            </div>
+
+            {/* ── Gövde ── */}
+            <div className="flex-1 p-4">
+              {!selected && !isOpen && (
+                /* Sadece mobilde katlanır — sm ve üstünde form hep açık */
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExpanded((prev) => {
+                      const next = [...prev];
+                      next[idx] = true;
+                      return next;
+                    })
+                  }
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line-strong py-6 text-sm text-ink-3 transition-colors duration-200 hover:border-accent/40 hover:bg-fill hover:text-ink-2 sm:hidden"
+                >
+                  <Plus className="h-4 w-4" />
+                  Karşılaştırma aracı ekle
+                </button>
+              )}
+
               {!selected ? (
-                <div className="space-y-2.5">
-                  {/* Row 1: Marka + Model */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Marka */}
-                    <div>
+                <div className={cn("space-y-3", !isOpen && "hidden sm:block")}>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <Field label="Marka" error={s.errors.make}>
                       <Select
                         value={s.make}
                         onValueChange={(v) => onMakeChange(v, idx)}
                       >
                         <SelectTrigger
-                          className={`w-full text-xs h-9 ${s.errors.make ? "border-red-400" : ""}`}
+                          className={cn(
+                            "h-10 w-full text-xs",
+                            s.errors.make && "border-danger/60"
+                          )}
                         >
-                          <SelectValue placeholder="Marka seçin..." />
+                          <SelectValue placeholder="Marka seçin…" />
                         </SelectTrigger>
                         <SelectContent>
                           {makes.map((m) => (
@@ -227,31 +299,26 @@ export function CarSelector({
                           ))}
                         </SelectContent>
                       </Select>
-                      {s.errors.make && (
-                        <p className="text-[10px] text-red-500 mt-0.5 flex items-center gap-0.5">
-                          <AlertCircle className="h-3 w-3" /> {s.errors.make}
-                        </p>
-                      )}
-                    </div>
+                    </Field>
 
-                    {/* Model */}
-                    <div>
+                    <Field
+                      label="Model"
+                      error={s.errors.model}
+                      loading={s.loadingModels}
+                    >
                       <Select
                         value={s.model}
                         onValueChange={(v) => onModelChange(v, idx)}
                         disabled={!s.make || s.loadingModels}
                       >
                         <SelectTrigger
-                          className={`w-full text-xs h-9 ${s.errors.model ? "border-red-400" : ""}`}
+                          className={cn(
+                            "h-10 w-full text-xs",
+                            s.errors.model && "border-danger/60"
+                          )}
                         >
                           <SelectValue
-                            placeholder={
-                              s.loadingModels
-                                ? "Yükleniyor..."
-                                : !s.make
-                                ? "Model"
-                                : "Model seçin..."
-                            }
+                            placeholder={!s.make ? "Önce marka" : "Model seçin…"}
                           />
                         </SelectTrigger>
                         <SelectContent>
@@ -262,34 +329,28 @@ export function CarSelector({
                           ))}
                         </SelectContent>
                       </Select>
-                      {s.errors.model && (
-                        <p className="text-[10px] text-red-500 mt-0.5 flex items-center gap-0.5">
-                          <AlertCircle className="h-3 w-3" /> {s.errors.model}
-                        </p>
-                      )}
-                    </div>
+                    </Field>
                   </div>
 
-                  {/* Row 2: Yıl + Motor Hacmi */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Yıl */}
-                    <div>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <Field
+                      label="Kasa Yılı"
+                      error={s.errors.year}
+                      loading={s.loadingYears}
+                    >
                       <Select
                         value={s.year?.toString() ?? ""}
                         onValueChange={(v) => onYearChange(v, idx)}
                         disabled={!s.model || s.loadingYears}
                       >
                         <SelectTrigger
-                          className={`w-full text-xs h-9 ${s.errors.year ? "border-red-400" : ""}`}
+                          className={cn(
+                            "h-10 w-full text-xs",
+                            s.errors.year && "border-danger/60"
+                          )}
                         >
                           <SelectValue
-                            placeholder={
-                              s.loadingYears
-                                ? "Yükleniyor..."
-                                : !s.model
-                                ? "Kasa Yılı"
-                                : "Kasa yılı seçin..."
-                            }
+                            placeholder={!s.model ? "Önce model" : "Yıl seçin…"}
                           />
                         </SelectTrigger>
                         <SelectContent>
@@ -304,31 +365,26 @@ export function CarSelector({
                           ))}
                         </SelectContent>
                       </Select>
-                      {s.errors.year && (
-                        <p className="text-[10px] text-red-500 mt-0.5 flex items-center gap-0.5">
-                          <AlertCircle className="h-3 w-3" /> {s.errors.year}
-                        </p>
-                      )}
-                    </div>
+                    </Field>
 
-                    {/* Motor Hacmi */}
-                    <div>
+                    <Field
+                      label="Motor"
+                      error={s.errors.engine}
+                      loading={s.loadingEngines}
+                    >
                       <Select
                         value={s.engine?.label ?? ""}
                         onValueChange={(v) => onEngineChange(v, idx)}
                         disabled={!s.year || s.loadingEngines}
                       >
                         <SelectTrigger
-                          className={`w-full text-xs h-9 ${s.errors.engine ? "border-red-400" : ""}`}
+                          className={cn(
+                            "h-10 w-full text-xs",
+                            s.errors.engine && "border-danger/60"
+                          )}
                         >
                           <SelectValue
-                            placeholder={
-                              s.loadingEngines
-                                ? "Yükleniyor..."
-                                : !s.year
-                                ? "Motor Hacmi"
-                                : "Motor hacmi seçin..."
-                            }
+                            placeholder={!s.year ? "Önce yıl" : "Motor seçin…"}
                           />
                         </SelectTrigger>
                         <SelectContent>
@@ -343,28 +399,18 @@ export function CarSelector({
                           ))}
                         </SelectContent>
                       </Select>
-                      {s.errors.engine && (
-                        <p className="text-[10px] text-red-500 mt-0.5 flex items-center gap-0.5">
-                          <AlertCircle className="h-3 w-3" /> {s.errors.engine}
-                        </p>
-                      )}
-                    </div>
+                    </Field>
                   </div>
 
-                  {/* Hesapla Butonu */}
                   <Button
-                    className="w-full h-9 text-xs font-semibold gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                    className="h-10 w-full gap-2 text-xs font-semibold"
                     onClick={() => onCalculate(idx)}
-                    disabled={
-                      s.loadingModels ||
-                      s.loadingYears ||
-                      s.loadingEngines
-                    }
+                    disabled={isBusy}
                   >
-                    {s.loadingModels || s.loadingYears || s.loadingEngines ? (
+                    {isBusy ? (
                       <>
                         <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                        Yükleniyor...
+                        Yükleniyor…
                       </>
                     ) : (
                       <>
@@ -376,52 +422,98 @@ export function CarSelector({
                 </div>
               ) : (
                 /* ── Seçilen Araç Özeti ── */
-                <div className="space-y-2">
-                  <div className="flex items-start justify-between gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                <div className="animate-fade-in space-y-3">
+                  <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <h4 className="font-bold text-slate-800 text-sm truncate">
+                      <h4 className="truncate text-base font-bold text-ink">
                         {selected.brand} {selected.model}
                       </h4>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        {selected.year} &middot;{" "}
-                        {selected.engineCC
-                          ? `${selected.engineCC} cc`
-                          : "—"}{" "}
-                        &middot; {selected.fuelType} &middot;{" "}
-                        {selected.weightKg} kg
+                      <p className="mt-0.5 text-xs text-ink-3">
+                        {selected.year} ·{" "}
+                        {selected.engineCC ? `${selected.engineCC} cc` : "—"} ·{" "}
+                        {selected.fuelType}
                       </p>
                     </div>
                     {tax && (
-                      <div className="shrink-0 text-right">
-                        <Badge
-                          variant={
-                            (`barem${tax.barem}` as
-                              | "barem1"
-                              | "barem2"
-                              | "barem3"
-                              | "barem4")
-                          }
-                          className="text-xs px-2 py-0.5"
-                        >
-                          {tax.baremLabel}
-                        </Badge>
-                        <p className="text-[11px] text-slate-600 mt-0.5 font-semibold">
-                          {tax.annualTax.toLocaleString("tr-TR")} TL/yıl
-                        </p>
-                        {tax.ageDiscountApplied && (
-                          <p className="text-[10px] text-emerald-600 font-medium">
-                            %30 yaş indirimi uygulandı
-                          </p>
-                        )}
-                      </div>
+                      <Badge
+                        variant={
+                          `barem${tax.barem}` as
+                            | "barem1"
+                            | "barem2"
+                            | "barem3"
+                            | "barem4"
+                        }
+                        className="shrink-0"
+                      >
+                        {tax.baremLabel}
+                      </Badge>
                     )}
                   </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div className="rounded-xl border border-line bg-fill p-2.5">
+                      <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-ink-3">
+                        <Weight className="h-3 w-3" /> Ağırlık
+                      </span>
+                      <p className="tnum mt-0.5 text-sm font-bold text-ink">
+                        {selected.weightKg.toLocaleString("tr-TR")}
+                        <span className="ml-1 text-xs font-normal opacity-70">
+                          kg
+                        </span>
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-line bg-fill p-2.5">
+                      <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-ink-3">
+                        <Gauge className="h-3 w-3" /> Yıllık Vergi
+                      </span>
+                      <p className="tnum mt-0.5 text-sm font-bold text-ink">
+                        {tax ? formatTL(tax.annualTax) : "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {tax?.ageDiscountApplied && (
+                    <p className="text-[11px] font-medium text-success">
+                      %30 yaş indirimi uygulandı
+                    </p>
+                  )}
                 </div>
               )}
             </div>
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/** Etiket + hata mesajı + yükleniyor iskeleti sarmalayıcısı */
+function Field({
+  label,
+  error,
+  loading,
+  children,
+}: {
+  label: string;
+  error?: string;
+  loading?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-ink-3">
+        {label}
+      </label>
+      {loading ? (
+        <div className="skeleton h-10 w-full" />
+      ) : (
+        children
+      )}
+      {error && (
+        <p className="mt-1 flex items-center gap-1 text-[10px] text-danger">
+          <AlertCircle className="h-3 w-3 shrink-0" /> {error}
+        </p>
+      )}
     </div>
   );
 }

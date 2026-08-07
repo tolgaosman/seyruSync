@@ -31,29 +31,56 @@ Runtime shape: **fully client-side static export**. There are no API routes, no 
 
 2. **Live rates** — [hooks/useExchangeRate.ts](hooks/useExchangeRate.ts) (GBP/USD/EUR vs TRY, 2 providers, 15-min refresh) and [hooks/useFuelPrice.ts](hooks/useFuelPrice.ts) (scrapes a KKTC fuel-price page via CORS proxy with regex, 24-hr refresh). Both expose a `source: "live" | "fallback" | "cached"` flag that the UI surfaces as a warning banner — preserve that pattern when adding data sources.
 
+   Both are **module-level singleton stores** read via `useSyncExternalStore`, not per-component state: one cached snapshot, one in-flight promise, one interval shared by all subscribers (first subscriber starts it, last one stops it). They're each called from two places (`page.tsx` header + the widget card), so per-component state would mean duplicate fetch loops and two consumers disagreeing about the rate. Keep new data hooks on this pattern.
+
 3. **Calculation** — [utils/taxCalculator.ts](utils/taxCalculator.ts) is pure and the single source of domain truth:
    - `BAREMS`: 4 weight brackets with TL/kg rates; **electric vehicles get a separate, shifted bracket table inside `calculateRoadTax()`** to compensate for battery weight.
    - `annualTax = weightKg × ratePerKg + BASE_EMISSION_FEE`, then −30% if the car is over 10 years old.
    - `calculateTCO()` = vehicle price (GBP→TL at live rate) + 5×tax + 5×fuel; electric fuel cost is 0. Note it calls `calculateRoadTax(car.weightKg)` **without** `fuelType`, so the EV bracket table does not apply inside TCO.
-   - `getBaremColors()` maps barem 1–4 to the Tailwind classes and the Recharts `fill` hex used across all components — use it rather than hardcoding barem colors.
+   - `getBaremColors()` maps barem 1–4 to Tailwind classes + a `fill` hex. It's a thin delegate to `BAREM_PALETTE` in [lib/theme.ts](lib/theme.ts) — the single source for barem, TCO-segment, and fuel-type colors. Never hardcode these; they used to be triplicated across `taxCalculator`, `ui/badge.tsx`, and `TCOChart` and drifted apart.
 
 Money is dual-currency by design: **vehicle prices are GBP, taxes and fuel are TL**. Conversion always goes through the live `gbpRate` passed down from `page.tsx`; format with `formatTL` / `formatGBP`.
 
 ### UI
 
-State lives entirely in `page.tsx` (`selectedCars: (Car|null)[]` of length 3, `annualKm`) and flows down as props — no store, no context. Presentational components ([TaxDisplay](components/TaxDisplay.tsx), [ComparisonTable](components/ComparisonTable.tsx), [TCOChart](components/TCOChart.tsx), [BaselineSummary](components/BaselineSummary.tsx)) each re-derive their numbers by calling the calculator; the widgets ([FuelPricesTable](components/FuelPricesTable.tsx), [ExchangeRatesTable](components/ExchangeRatesTable.tsx)) call the hooks themselves.
+State lives entirely in `page.tsx` (`selectedCars: (Car|null)[]` of length 3, `annualKm`) and flows down as props — no store, no context. Pass `selectedCars` **unfiltered** to `CarSelector`: slot indices must stay aligned, or a car lands in the wrong slot when an earlier one is empty. Presentational components ([TaxDisplay](components/TaxDisplay.tsx), [ComparisonTable](components/ComparisonTable.tsx), [TCOChart](components/TCOChart.tsx), [BaselineSummary](components/BaselineSummary.tsx)) each re-derive their numbers by calling the calculator; the widgets ([FuelPricesTable](components/FuelPricesTable.tsx), [ExchangeRatesTable](components/ExchangeRatesTable.tsx)) call the hooks themselves.
 
-`components/ui/` is shadcn-style Radix + `cva` primitives. Tailwind v4 (PostCSS plugin, no `tailwind.config`). Charts use Recharts. Imports use the `@/*` path alias.
+Layout is a single vertical flow (header → car strip → tax cards → table → chart → market widgets), not columns. Every widget is rendered **once**; responsive variants are handled by breakpoints, not by `hidden`/`lg:hidden` duplicate subtrees. The one deliberate exception is `ComparisonTable`, which renders a card list below `md` and a real table above — static props, no hooks behind it.
+
+`components/ui/` is shadcn-style Radix + `cva` primitives, plus `stat.tsx` (KPI tile) and `widget-card.tsx` (market-widget shell + `DataSourceBadge`). Tailwind v4 (PostCSS plugin, no `tailwind.config`). Charts use Recharts. Imports use the `@/*` path alias.
+
+### Theming
+
+Light and dark, toggled by `data-theme` on `<html>`, persisted to `localStorage` and applied by an inline script in [layout.tsx](app/layout.tsx) before first paint (removing it causes a theme flash).
+
+[globals.css](app/globals.css) is the whole system: `@theme` only *indirects* (`--color-x: var(--t-x)`), and the real values live in two palettes — `:root` (light) and `[data-theme="dark"]`. So a new color means adding it in three places: the `@theme` alias and both palettes.
+
+Rules that are easy to get wrong:
+- **Never write `bg-white/[0.05]`-style overlays** — they vanish in light mode. Use the `fill` / `fill-2` / `fill-3` tokens, which flip to a dark tint in light mode.
+- `.glass`, `.skeleton`, and the other helpers must stay inside `@layer components`. Unlayered, they outrank every Tailwind utility and silently kill `ring-*` / `shadow-*` / `border-*` overrides on cards.
+- **Recharts can't use CSS variables** (`var()` doesn't resolve in SVG presentation attributes). Chart colors come from `TCO_SEGMENT_COLORS_BY_THEME`, `CHART_CHROME`, and `BAREM_HEX` in `lib/theme.ts`, selected at runtime via `useTheme()`.
+
+`useTheme` is a `useSyncExternalStore` over the DOM attribute, so the DOM stays authoritative and there's no hydration mismatch.
 
 Types shared across layers live in [types/index.ts](types/index.ts); `EngineOption` is the exception and lives in `services/vehicleApi.ts`. [data/cars.ts](data/cars.ts) is a deliberately emptied stub kept for import compatibility.
 
 ## Deployment
 
-`next.config.ts` sets `output: "export"`, `distDir: "docs"`, and `basePath: "/seyruSync/docs"` in production — so a production build writes the site into `docs/`, **which is committed to git** and served by GitHub Pages. Root [index.html](index.html) is a redirect stub into `docs/`. Consequences:
+`next.config.ts` sets `output: "export"`, `distDir: "docs"`, and `basePath: "/autoCalc/docs"` in production — so a production build writes the site into `docs/`, **which is committed to git** and served by GitHub Pages. Root [index.html](index.html) is a redirect stub into `docs/`. Consequences:
 
 - `npm run build` produces a large, intentional diff under `docs/`. That is expected, not accidental.
 - The `deploy` script (`gh-pages -d out`) points at `out/`, which this config never produces; the live path is the committed `docs/` directory.
-- The `basePath` hardcodes repo name `seyruSync`, while this checkout is `autoCalc` and the package is `autobarem`. Changing the repo name requires updating `basePath`.
+- `docs/dev/` is a stray dev-server artifact directory, untracked but **not** gitignored — check `git status` before a blind `git add .` near a build.
+
+## Backend (`backend/`)
+
+A FastAPI service exists at [backend/](backend/) — see [backend/README.md](backend/README.md) for setup. It is an **enhancement layer, not a dependency**: the frontend stays a static export on GitHub Pages, the backend runs separately (Fly.io/Render), and every frontend call to it goes through [lib/api.ts](lib/api.ts)'s `apiGet()`, which times out (6–8s) and returns `null` on any failure — network error, timeout, CORS, non-2xx. Callers then fall through to the pre-existing fallback chains (local JSON, direct provider calls, heuristics), which were **not removed**. The site must work identically with the backend stopped; verify this after touching either side.
+
+What it replaces: the CORS-proxy ladders in `services/vehicleApi.ts` (CarQuery) and `hooks/useFuelPrice.ts` (HTML scrape) now try the backend first (`/api/vehicles/*`, `/api/fuel`), and `hooks/useExchangeRate.ts` tries `/api/rates` before its own two direct providers. `EngineOption` gained optional `priceGBP`/`priceConfidence` fields — the backend embeds a price directly in the engines response (`confidence: "manual" | "listing" | "baseline"`, mostly `"baseline"` today, a Python port of `estimatePriceGBP()`) because `CarSelector.onCalculate` calls `buildCar()` **synchronously** and must stay that way.
+
+Backend-side: SQLite via SQLAlchemy, one `cache_entries` table implementing stale-while-error (`app/cache.py` — serve the last good value with `source:"stale"` rather than ever erroring), and a `makes/models/model_years/engines` catalog seeded from a copy of `data/kktc_popular_cars.json` at `backend/app/seed/`. **CarQuery results are never auto-promoted into the catalog** — only cached — because CarQuery frequently omits weight and the code would otherwise persist a fabricated value as if it were a fact (weight drives the tax barem). Tax math is **not** duplicated server-side; `utils/taxCalculator.ts` stays the only implementation.
+
+`carqueryapi.com` currently serves a mismatched SSL certificate (their bug, not this code) — the backend's stale-while-error handling absorbs it and returns `source:"fallback"` rather than crashing. Don't "fix" this by disabling certificate verification.
 
 ## Next.js version
 

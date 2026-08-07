@@ -1,23 +1,24 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { BAREM_PALETTE } from "@/lib/theme";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50",
   {
     variants: {
       variant: {
-        default:
-          "border-transparent bg-slate-900 text-white hover:bg-slate-800",
-        secondary:
-          "border-transparent bg-slate-100 text-slate-900 hover:bg-slate-200",
-        destructive:
-          "border-transparent bg-red-500 text-white hover:bg-red-600",
-        outline: "text-slate-900",
-        barem1: "bg-emerald-100 text-emerald-800 border-emerald-300",
-        barem2: "bg-yellow-100 text-yellow-800 border-yellow-300",
-        barem3: "bg-orange-100 text-orange-800 border-orange-300",
-        barem4: "bg-red-100 text-red-800 border-red-300",
+        default: "border-accent/30 bg-accent/15 text-ink",
+        secondary: "border-line bg-fill-2 text-ink-2",
+        destructive: "border-danger/30 bg-danger/12 text-danger",
+        success: "border-success/30 bg-success/12 text-success",
+        warn: "border-warn/30 bg-warn/12 text-warn",
+        info: "border-info/30 bg-info/12 text-info",
+        outline: "border-line text-ink-2",
+        barem1: BAREM_PALETTE[1].badge,
+        barem2: BAREM_PALETTE[2].badge,
+        barem3: BAREM_PALETTE[3].badge,
+        barem4: BAREM_PALETTE[4].badge,
       },
     },
     defaultVariants: {

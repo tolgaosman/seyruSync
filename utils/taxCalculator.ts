@@ -1,4 +1,5 @@
 import { TaxResult, TCOBreakdown, Car } from "@/types";
+import { BAREM_PALETTE } from "@/lib/theme";
 
 // ============================================================
 // KKTC Seyrüsefer Vergisi (Yol Vergisi) Hesaplama
@@ -188,38 +189,9 @@ export function formatGBP(amount: number): string {
 }
 
 /**
- * Barem rengini döndürür (Tailwind class'ları).
+ * Barem rengini döndürür (Tailwind class'ları + ham hex).
+ * Renkler `lib/theme.ts` içindeki tek kaynaktan okunur.
  */
 export function getBaremColors(barem: 1 | 2 | 3 | 4) {
-  const map = {
-    1: {
-      badge: "bg-emerald-100 text-emerald-800 border-emerald-300",
-      border: "border-emerald-400",
-      text: "text-emerald-700",
-      bg: "bg-emerald-50",
-      fill: "#10b981",
-    },
-    2: {
-      badge: "bg-yellow-100 text-yellow-800 border-yellow-300",
-      border: "border-yellow-400",
-      text: "text-yellow-700",
-      bg: "bg-yellow-50",
-      fill: "#f59e0b",
-    },
-    3: {
-      badge: "bg-orange-100 text-orange-800 border-orange-300",
-      border: "border-orange-400",
-      text: "text-orange-700",
-      bg: "bg-orange-50",
-      fill: "#f97316",
-    },
-    4: {
-      badge: "bg-red-100 text-red-800 border-red-300",
-      border: "border-red-400",
-      text: "text-red-700",
-      bg: "bg-red-50",
-      fill: "#ef4444",
-    },
-  };
-  return map[barem];
+  return BAREM_PALETTE[barem];
 }

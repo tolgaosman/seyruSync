@@ -1,15 +1,38 @@
+"use client";
+
 import { useState } from "react";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
-import { PoundSterling, DollarSign, Euro, RefreshCw, AlertTriangle, ArrowRightLeft } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import {
+  PoundSterling,
+  DollarSign,
+  Euro,
+  ArrowRightLeft,
+} from "lucide-react";
+import { WidgetCard } from "@/components/ui/widget-card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type Currency = "GBP" | "USD" | "EUR" | "TRY";
 
 export function ExchangeRatesTable() {
-  const { rates, source, fetchedAt, isLoading, refresh } = useExchangeRate();
+  const { rates, source, fetchedAt, isLoading, error, refresh } =
+    useExchangeRate();
   const [amount, setAmount] = useState<string>("100");
-  const [baseCurrency, setBaseCurrency] = useState<"GBP" | "USD" | "EUR" | "TRY">("GBP");
+  const [baseCurrency, setBaseCurrency] = useState<Currency>("GBP");
 
   const fetchedDate = fetchedAt
     ? new Date(fetchedAt).toLocaleTimeString("tr-TR", {
@@ -18,7 +41,7 @@ export function ExchangeRatesTable() {
       })
     : "Bilinmiyor";
 
-  // Çeviri hesaplama
+  // Çeviri hesaplama — matematik değişmedi
   const numAmount = parseFloat(amount) || 0;
   let inTRY = 0;
   if (baseCurrency === "TRY") inTRY = numAmount;
@@ -31,103 +54,113 @@ export function ExchangeRatesTable() {
   const outEUR = baseCurrency === "EUR" ? numAmount : inTRY / rates.eur;
   const outTRY = inTRY;
 
+  const rows = [
+    { code: "GBP", icon: <PoundSterling className="h-3.5 w-3.5" />, rate: rates.gbp },
+    { code: "USD", icon: <DollarSign className="h-3.5 w-3.5" />, rate: rates.usd },
+    { code: "EUR", icon: <Euro className="h-3.5 w-3.5" />, rate: rates.eur },
+  ];
+
+  const results: Array<[Currency, string, string]> = [
+    ["GBP", "£", outGBP.toLocaleString("tr-TR", { maximumFractionDigits: 2 })],
+    ["USD", "$", outUSD.toLocaleString("tr-TR", { maximumFractionDigits: 2 })],
+    ["EUR", "€", outEUR.toLocaleString("tr-TR", { maximumFractionDigits: 2 })],
+    ["TRY", "₺", outTRY.toLocaleString("tr-TR", { maximumFractionDigits: 2 })],
+  ];
+
   return (
-    <Card className="shadow-sm border-slate-200 mt-4">
-      <CardHeader className="bg-slate-50 border-b border-slate-200 pb-3 pt-4 px-4 flex flex-row items-center justify-between space-y-0 rounded-t-xl">
-        <CardTitle className="text-sm font-bold text-slate-800 flex items-center gap-2">
-          <PoundSterling className="h-4 w-4 text-blue-500" />
-          Canlı Döviz Kurları
-        </CardTitle>
-        <button
-          onClick={refresh}
-          className="text-slate-400 hover:text-blue-600 transition-colors"
-          title="Kurları Yenile"
-        >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-        </button>
-      </CardHeader>
-      <CardContent className="p-0">
-        <table className="w-full text-sm text-left">
-          <thead className="text-[10px] uppercase text-slate-500 bg-slate-50/50">
-            <tr>
-              <th className="py-1.5 px-4 font-semibold border-b border-slate-100">Döviz</th>
-              <th className="py-1.5 px-4 text-right font-semibold border-b border-slate-100">Alış</th>
-              <th className="py-1.5 px-4 text-right font-semibold border-b border-slate-100">Satış</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-slate-100 hover:bg-slate-50/50">
-              <td className="py-2.5 px-4 font-medium text-slate-700 flex items-center gap-2">
-                <PoundSterling className="h-3.5 w-3.5 text-slate-400" /> GBP
-              </td>
-              <td className="py-2.5 px-4 text-right text-emerald-600 font-medium">{(rates.gbp * 0.995).toFixed(4)} ₺</td>
-              <td className="py-2.5 px-4 text-right text-red-600 font-bold">{(rates.gbp * 1.005).toFixed(4)} ₺</td>
-            </tr>
-            <tr className="border-b border-slate-100 hover:bg-slate-50/50">
-              <td className="py-2.5 px-4 font-medium text-slate-700 flex items-center gap-2">
-                <DollarSign className="h-3.5 w-3.5 text-slate-400" /> USD
-              </td>
-              <td className="py-2.5 px-4 text-right text-emerald-600 font-medium">{(rates.usd * 0.995).toFixed(4)} ₺</td>
-              <td className="py-2.5 px-4 text-right text-red-600 font-bold">{(rates.usd * 1.005).toFixed(4)} ₺</td>
-            </tr>
-            <tr className="border-b border-slate-100 hover:bg-slate-50/50">
-              <td className="py-2.5 px-4 font-medium text-slate-700 flex items-center gap-2">
-                <Euro className="h-3.5 w-3.5 text-slate-400" /> EUR
-              </td>
-              <td className="py-2.5 px-4 text-right text-emerald-600 font-medium">{(rates.eur * 0.995).toFixed(4)} ₺</td>
-              <td className="py-2.5 px-4 text-right text-red-600 font-bold">{(rates.eur * 1.005).toFixed(4)} ₺</td>
-            </tr>
-          </tbody>
-        </table>
-        
-        {/* Hızlı Çevirici */}
-        <div className="bg-slate-50 p-4 border-t border-slate-100">
-          <div className="flex items-center gap-2 mb-3">
-            <ArrowRightLeft className="h-3.5 w-3.5 text-blue-500" />
-            <span className="text-xs font-bold text-slate-600 uppercase">Kur Çevirici</span>
-          </div>
-          <div className="flex gap-2 mb-3">
-            <Input 
-              type="number" 
-              value={amount} 
-              onChange={(e) => setAmount(e.target.value)} 
-              className="h-8 text-sm flex-1"
-              placeholder="Miktar"
-            />
-            <Select value={baseCurrency} onValueChange={(val: "GBP" | "USD" | "EUR" | "TRY") => setBaseCurrency(val)}>
-              <SelectTrigger className="w-24 h-8 text-xs font-semibold">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="GBP">GBP (£)</SelectItem>
-                <SelectItem value="USD">USD ($)</SelectItem>
-                <SelectItem value="EUR">EUR (€)</SelectItem>
-                <SelectItem value="TRY">TL (₺)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            {baseCurrency !== "GBP" && <div className="bg-white p-2 rounded border border-slate-200 text-center"><span className="text-slate-400 text-[10px] block mb-0.5">GBP</span><span className="font-bold">£{outGBP.toLocaleString("tr-TR", { maximumFractionDigits: 2 })}</span></div>}
-            {baseCurrency !== "USD" && <div className="bg-white p-2 rounded border border-slate-200 text-center"><span className="text-slate-400 text-[10px] block mb-0.5">USD</span><span className="font-bold">${outUSD.toLocaleString("tr-TR", { maximumFractionDigits: 2 })}</span></div>}
-            {baseCurrency !== "EUR" && <div className="bg-white p-2 rounded border border-slate-200 text-center"><span className="text-slate-400 text-[10px] block mb-0.5">EUR</span><span className="font-bold">€{outEUR.toLocaleString("tr-TR", { maximumFractionDigits: 2 })}</span></div>}
-            {baseCurrency !== "TRY" && <div className="bg-white p-2 rounded border border-slate-200 text-center"><span className="text-slate-400 text-[10px] block mb-0.5">TRY</span><span className="font-bold text-blue-600">₺{outTRY.toLocaleString("tr-TR", { maximumFractionDigits: 2 })}</span></div>}
-          </div>
+    <WidgetCard
+      title="Canlı Döviz Kurları"
+      icon={<PoundSterling className="h-4 w-4" />}
+      source={source === "loading" ? "loading" : source}
+      lastUpdated={fetchedDate}
+      isLoading={isLoading}
+      error={error}
+      onRefresh={refresh}
+    >
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Döviz</TableHead>
+            <TableHead className="text-right">Alış</TableHead>
+            <TableHead className="text-right">Satış</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map(({ code, icon, rate }) => (
+            <TableRow key={code}>
+              <TableCell className="font-medium text-ink-2">
+                <span className="flex items-center gap-2">
+                  <span className="text-ink-3">{icon}</span> {code}
+                </span>
+              </TableCell>
+              <TableCell className="tnum text-right font-medium text-success">
+                {(rate * 0.995).toFixed(4)} ₺
+              </TableCell>
+              <TableCell className="tnum text-right font-bold text-danger">
+                {(rate * 1.005).toFixed(4)} ₺
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      {/* ── Hızlı Çevirici ── */}
+      <div className="border-t border-line bg-fill p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <ArrowRightLeft className="h-3.5 w-3.5 text-accent-2" />
+          <span className="text-[11px] font-bold uppercase tracking-wider text-ink-3">
+            Kur Çevirici
+          </span>
         </div>
 
-        <div className="bg-slate-100 px-4 py-2 flex items-center justify-between text-[10px] text-slate-500 rounded-b-xl border-t border-slate-200">
-          <div className="flex items-center gap-1.5">
-            {source === "live" ? (
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[9px] px-1.5 py-0">Canlı Veri</Badge>
-            ) : (
-              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-[9px] px-1.5 py-0 flex items-center gap-1">
-                <AlertTriangle className="h-2 w-2" /> Yedek
-              </Badge>
-            )}
-          </div>
-          <span className="font-medium">Son Güncelleme: {fetchedDate}</span>
+        <div className="mb-3 flex gap-2">
+          <Input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="h-10 flex-1 text-base sm:text-sm"
+            placeholder="Miktar"
+            aria-label="Çevrilecek miktar"
+          />
+          <Select
+            value={baseCurrency}
+            onValueChange={(val: Currency) => setBaseCurrency(val)}
+          >
+            <SelectTrigger className="h-10 w-28 text-xs font-semibold">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="GBP">GBP (£)</SelectItem>
+              <SelectItem value="USD">USD ($)</SelectItem>
+              <SelectItem value="EUR">EUR (€)</SelectItem>
+              <SelectItem value="TRY">TL (₺)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="grid grid-cols-3 gap-2">
+          {results
+            .filter(([code]) => code !== baseCurrency)
+            .map(([code, symbol, value]) => (
+              <div
+                key={code}
+                className="rounded-xl border border-line bg-fill p-2 text-center"
+              >
+                <span className="block text-[10px] uppercase tracking-wide text-ink-3">
+                  {code}
+                </span>
+                <span
+                  className={`tnum text-sm font-bold ${
+                    code === "TRY" ? "text-accent-2" : "text-ink"
+                  }`}
+                >
+                  {symbol}
+                  {value}
+                </span>
+              </div>
+            ))}
+        </div>
+      </div>
+    </WidgetCard>
   );
 }
