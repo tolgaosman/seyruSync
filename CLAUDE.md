@@ -66,7 +66,7 @@ Types shared across layers live in [types/index.ts](types/index.ts); `EngineOpti
 
 ## Deployment
 
-`next.config.ts` sets `output: "export"`, `distDir: "docs"`, and `basePath: "/autoCalc/docs"` in production — so a production build writes the site into `docs/`, **which is committed to git** and served by GitHub Pages. Root [index.html](index.html) is a redirect stub into `docs/`. Consequences:
+`next.config.ts` sets `output: "export"`, `distDir: "docs"`, and `basePath: "/autoCalc"` in production — so a production build writes the site into `docs/`, **which is committed to git** and served by GitHub Pages configured as **Deploy from branch → `main` → `/docs`**. That mapping makes `docs/index.html` the site root at `https://tolgaosman.github.io/autoCalc/` directly — no redirect stub. Consequences:
 
 - `npm run build` produces a large, intentional diff under `docs/`. That is expected, not accidental.
 - The `deploy` script (`gh-pages -d out`) points at `out/`, which this config never produces; the live path is the committed `docs/` directory.

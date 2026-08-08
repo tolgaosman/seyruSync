@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: isProd ? "/autoCalc/docs" : "",
+  basePath: isProd ? "/autoCalc" : "",
 };
 
 export default nextConfig;

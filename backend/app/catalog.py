@@ -18,11 +18,13 @@ from sqlalchemy.orm import Session
 from app.cache import get_or_refresh
 from app.models import Make, ModelYear, VehicleModel, VehiclePrice
 from app.pricing import estimate_price_gbp
-from app.providers import carquery
+from app.providers import carquery, wikidata
 from app.slug import slugify
 
 CARQUERY_TTL = timedelta(days=7)
 CARQUERY_ENGINES_TTL = timedelta(days=30)
+WIKIDATA_TTL = timedelta(days=14)
+WIKIDATA_ENGINES_TTL = timedelta(days=30)
 
 
 def catalog_makes(db: Session) -> list[str]:
@@ -106,6 +108,58 @@ async def carquery_engines(
         key=f"carquery:engines:{slugify(make)}:{slugify(model)}:{year}",
         ttl=CARQUERY_ENGINES_TTL,
         fetcher=lambda: _wrap_trims(make, model, year),
+        fallback_payload={"items": []},
+        fallback_source="fallback",
+    )
+    return payload["items"], source
+
+
+async def wikidata_makes(db: Session) -> tuple[list[str], str]:
+    # Pragmatik: Wikidata global marka listesi vermiyor (fetch_makes -> []).
+    # Sarmalayıcı simetri için var; makes endpoint'inde kullanılmıyor.
+    payload, source, _ = await get_or_refresh(
+        db,
+        key="wikidata:makes",
+        ttl=WIKIDATA_TTL,
+        fetcher=lambda: _wrap(wikidata.fetch_makes()),
+        fallback_payload={"items": []},
+        fallback_source="fallback",
+    )
+    return payload["items"], source
+
+
+async def wikidata_models(db: Session, make: str) -> tuple[list[str], str]:
+    payload, source, _ = await get_or_refresh(
+        db,
+        key=f"wikidata:models:{slugify(make)}",
+        ttl=WIKIDATA_TTL,
+        fetcher=lambda: _wrap(wikidata.fetch_models(make)),
+        fallback_payload={"items": []},
+        fallback_source="fallback",
+    )
+    return payload["items"], source
+
+
+async def wikidata_years(db: Session, make: str, model: str) -> tuple[list[int], str]:
+    payload, source, _ = await get_or_refresh(
+        db,
+        key=f"wikidata:years:{slugify(make)}:{slugify(model)}",
+        ttl=WIKIDATA_TTL,
+        fetcher=lambda: _wrap(wikidata.fetch_years(make, model)),
+        fallback_payload={"items": []},
+        fallback_source="fallback",
+    )
+    return payload["items"], source
+
+
+async def wikidata_engines(
+    db: Session, make: str, model: str, year: int
+) -> tuple[list[dict], str]:
+    payload, source, _ = await get_or_refresh(
+        db,
+        key=f"wikidata:engines:{slugify(make)}:{slugify(model)}:{year}",
+        ttl=WIKIDATA_ENGINES_TTL,
+        fetcher=lambda: _wrap(wikidata.fetch_engines(make, model, year)),
         fallback_payload={"items": []},
         fallback_source="fallback",
     )

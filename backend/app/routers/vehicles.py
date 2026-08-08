@@ -21,9 +21,11 @@ async def get_makes(db: Session = Depends(get_db)) -> MakesResponse:
 @router.get("/models", response_model=ModelsResponse)
 async def get_models(make: str, db: Session = Depends(get_db)) -> ModelsResponse:
     local = catalog.catalog_models(db, slugify(make))
+    wd_items, wd_source = await catalog.wikidata_models(db, make)
     cq_items, cq_source = await catalog.carquery_models(db, make)
-    merged = sorted(set(local) | set(cq_items))
-    source = "live" if cq_source == "live" else ("fallback" if not local else "cached")
+    merged = sorted(set(local) | set(wd_items) | set(cq_items))
+    live = wd_source == "live" or cq_source == "live"
+    source = "live" if live else ("fallback" if not local else "cached")
     return ModelsResponse(models=merged, source=source)
 
 
@@ -31,11 +33,16 @@ async def get_models(make: str, db: Session = Depends(get_db)) -> ModelsResponse
 async def get_years(make: str, model: str, db: Session = Depends(get_db)) -> YearsResponse:
     local = catalog.catalog_years(db, slugify(make), slugify(model))
     if local:
-        # Doğrulanmış katalogda varsa CarQuery'ye hiç gidilmiyor —
+        # Doğrulanmış katalogda varsa dış kaynağa hiç gidilmiyor —
         # frontend'deki kısa devre mantığının aynısı.
         return YearsResponse(years=local, source="cached")
 
-    # Katalogda yok — CarQuery'ye düş (ileride nesil-kümeleme eklenebilir; MVP'de ham yıllar).
+    # Katalogda yok — Wikidata nesillerinin inception (P571) yıllarına düş.
+    # Not: bunlar nesil-bazlı yıllar, yıllık değil. CarQuery years yine bağlanmadan kalır.
+    wd_years, wd_source = await catalog.wikidata_years(db, make, model)
+    if wd_years:
+        return YearsResponse(years=sorted(wd_years, reverse=True), source=wd_source)
+
     return YearsResponse(years=[], source="fallback")
 
 
@@ -49,8 +56,11 @@ async def get_engines(
     if local:
         engines, source = local, "cached"
     else:
-        engines, cq_source = await catalog.carquery_engines(db, make, model, year)
-        source = cq_source
+        # Yerel yoksa önce Wikidata, boşsa CarQuery. weightKg None ise ASLA burada
+        # uydurulmaz — sadece sunum varsayılanı 1350 uygulanır (vergi baremi güvenliği).
+        engines, source = await catalog.wikidata_engines(db, make, model, year)
+        if not engines:
+            engines, source = await catalog.carquery_engines(db, make, model, year)
         for e in engines:
             if e["weightKg"] is None:
                 e["weightKg"] = 1350
